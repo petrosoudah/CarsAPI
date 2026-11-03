@@ -15,7 +15,9 @@ export default function Navigation() {
         <nav className="flex flex-wrap items-center gap-5 bg-muted p-5">
             <span style={{ margin: 0, textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)", font: "bold 24px Comic Sans MS" }}>CarsAPI</span>
             <Link href="/">{t("dashboard")}</Link>
-            <Link href="/about">{t("about")}</Link>
+                <Link href="/about">{t("about")}</Link>
+
+                <Link href="/parts">{t("parts")}</Link>
             <ThemeToggle />
         </nav>
         </>

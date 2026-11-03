@@ -10,7 +10,8 @@
     "available": "Available",
     "sold": "Sold",
     "toggleTheme": "Toggle dark mode",
-    "skip": "Skip to main content"
+    "skip": "Skip to main content",
+    "parts": "Spare parts"
   },
   "Card": {
     "toggle": "Toggle availability",
@@ -71,7 +72,11 @@
     "network": "Could not connect to the server. Please try again.",
     "invalidPrice": "Please enter a valid price.",
     "invalidDetails": "Please enter valid car details.",
-    "pagination": "Pagination information is missing. Restart the updated CarsAPI server."
+    "pagination": "Pagination information is missing. Restart the updated CarsAPI server.",
+    "loadParts": "Could not load parts.",
+    "addPart": "Could not add part.",
+    "updatePart": "Could not update part.",
+    "invalidPartDetails": "Please enter valid part details."
   },
   "Dashboard": {
     "filterLabel": "Filter by availability",
@@ -101,5 +106,24 @@
     "horsepower": "Enter a whole number between 1 and 2,147,483,647.",
     "price": "Enter a valid price of zero or more.",
     "color": "Use no more than 30 characters."
+  },
+  "Parts": {
+    "title": "Parts",
+    "loading": "Loading parts...",
+    "loaded": "{count, plural, =0 {No parts loaded.} one {Loaded # part.} other {Loaded # parts.}}",
+    "empty": "No parts found.",
+    "price": "Price: {value}",
+    "car": "Car: {name}",
+    "unassigned": "Unassigned",
+    "cancelEditing": "Cancel editing",
+    "edit": "Edit part",
+    "add": "Add part",
+    "save": "Save changes",
+    "saving": "Saving...",
+    "manufacturer": "Manufacturer",
+    "description": "Description",
+    "priceLabel": "Price",
+    "carOptional": "Car (optional)",
+    "loadingCars": "Loading car options..."
   }
 }

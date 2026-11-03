@@ -8,6 +8,10 @@ export default function useTranslatedError() {
     const t = useTranslations("Errors");
 
     return (message: string) => {
+        if (message.startsWith("Could not load parts")) return t("loadParts");
+        if (message.startsWith("Could not add part")) return t("addPart");
+        if (message.startsWith("Could not update part")) return t("updatePart");
+        if (message === "Please enter valid part details.") return t("invalidPartDetails");
         if (message.startsWith("Pagination information is missing.")) return t("pagination");
         if (message.startsWith("Could not load cars")) return t("loadCars");
         if (message.startsWith("Could not load car")) return t("loadCar");

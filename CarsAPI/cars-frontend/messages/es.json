@@ -10,7 +10,8 @@
     "available": "Disponible",
     "sold": "Vendido",
     "toggleTheme": "Alternar modo oscuro",
-    "skip": "Ir al contenido principal"
+    "skip": "Ir al contenido principal",
+    "parts": "Piezas"
   },
   "Card": {
     "toggle": "Cambiar disponibilidad",
@@ -71,7 +72,11 @@
     "network": "No se pudo conectar con el servidor. Inténtalo de nuevo.",
     "invalidPrice": "Introduce un precio válido.",
     "invalidDetails": "Introduce datos válidos para el coche.",
-    "pagination": "Faltan los datos de paginación. Reinicia el servidor CarsAPI actualizado."
+    "pagination": "Faltan los datos de paginación. Reinicia el servidor CarsAPI actualizado.",
+    "loadParts": "No se pudieron cargar las piezas.",
+    "addPart": "No se pudo añadir la pieza.",
+    "updatePart": "No se pudo actualizar la pieza.",
+    "invalidPartDetails": "Introduce datos válidos para la pieza."
   },
   "Dashboard": {
     "filterLabel": "Filtrar por disponibilidad",
@@ -101,5 +106,24 @@
     "horsepower": "Introduce un número entero entre 1 y 2.147.483.647.",
     "price": "Introduce un precio válido de cero o más.",
     "color": "Usa un máximo de 30 caracteres."
+  },
+  "Parts": {
+    "title": "Piezas",
+    "loading": "Cargando piezas...",
+    "loaded": "{count, plural, =0 {No se han cargado piezas.} one {Se ha cargado # pieza.} other {Se han cargado # piezas.}}",
+    "empty": "No se encontraron piezas.",
+    "price": "Precio: {value}",
+    "car": "Coche: {name}",
+    "unassigned": "Sin asignar",
+    "cancelEditing": "Cancelar edición",
+    "edit": "Editar pieza",
+    "add": "Añadir pieza",
+    "save": "Guardar cambios",
+    "saving": "Guardando...",
+    "manufacturer": "Fabricante",
+    "description": "Descripción",
+    "priceLabel": "Precio",
+    "carOptional": "Coche (opcional)",
+    "loadingCars": "Cargando opciones de coches..."
   }
 }
