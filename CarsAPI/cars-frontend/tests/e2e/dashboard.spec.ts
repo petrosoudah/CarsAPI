@@ -166,9 +166,10 @@ test("keyboard focus stays in the modal and Escape closes it", async ({ page }) 
     await page.keyboard.press("Enter");
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
+    await expect.poll(() => dialog.evaluate(element => element.contains(document.activeElement))).toBe(true);
     for (let step = 0; step < 12; step++) {
         await page.keyboard.press("Tab");
-        expect(await dialog.evaluate(element => element.contains(document.activeElement))).toBe(true);
+        await expect.poll(() => dialog.evaluate(element => element.contains(document.activeElement))).toBe(true);
     }
     await page.keyboard.press("Escape");
     await expect(dialog).toHaveCount(0);

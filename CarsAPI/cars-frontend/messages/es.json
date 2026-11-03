@@ -76,7 +76,8 @@
     "loadParts": "No se pudieron cargar las piezas.",
     "addPart": "No se pudo añadir la pieza.",
     "updatePart": "No se pudo actualizar la pieza.",
-    "invalidPartDetails": "Introduce datos válidos para la pieza."
+    "invalidPartDetails": "Introduce datos válidos para la pieza.",
+    "deletePart": "No se pudo eliminar la pieza."
   },
   "Dashboard": {
     "filterLabel": "Filtrar por disponibilidad",
@@ -108,6 +109,11 @@
     "color": "Usa un máximo de 30 caracteres."
   },
   "Parts": {
+    "pagination": "Páginas de piezas",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "page": "Página {page} de {pages}",
+    "results": "Mostrando {count} de {total} piezas",
     "title": "Piezas",
     "loading": "Cargando piezas...",
     "loaded": "{count, plural, =0 {No se han cargado piezas.} one {Se ha cargado # pieza.} other {Se han cargado # piezas.}}",
@@ -124,6 +130,23 @@
     "description": "Descripción",
     "priceLabel": "Precio",
     "carOptional": "Coche (opcional)",
-    "loadingCars": "Cargando opciones de coches..."
+    "loadingCars": "Cargando opciones de coches...",
+    "retry": "Reintentar cargar las piezas",
+    "retryCars": "Reintentar cargar las opciones de coches",
+    "selectedCar": "Coche {id}",
+    "saved": "Pieza guardada.",
+    "listLabel": "Lista de piezas",
+    "delete": "Eliminar pieza",
+    "deleteTitle": "¿Eliminar la pieza?",
+    "deleteDescription": "¿Eliminar {manufacturer} — {description}? Esta acción no se puede deshacer.",
+    "deleting": "Eliminando...",
+    "deleted": "Pieza eliminada."
+  },
+  "PartValidation": {
+    "required": "Este campo es obligatorio.",
+    "manufacturerLength": "Usa un máximo de 100 caracteres.",
+    "descriptionLength": "Usa un máximo de 500 caracteres.",
+    "price": "Introduce un precio no negativo con un máximo de dos decimales.",
+    "car": "Selecciona un coche válido o deja la pieza sin asignar."
   }
 }

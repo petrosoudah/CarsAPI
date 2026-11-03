@@ -158,13 +158,21 @@ app.MapDelete("/cars/{id}", async (
 
 app.MapGet("/parts/list", async (
     ISender mediator,
+    HttpResponse response,
     int pageNumber = 1,
     int pageSize = Pagination.DefaultPageSize) =>
 {
     if (!Pagination.IsValid(pageNumber, pageSize))
-        return Results.BadRequest("Page number must be positive and page size must be between 1 and 100.");
+        return Results.BadRequest(
+            "Page number must be positive and page size must be between 1 and 100.");
 
-    var parts = await mediator.Send(new GetParts(pageNumber, pageSize));
+    var parts = await mediator.Send(
+        new GetParts(pageNumber, pageSize));
+
+    response.Headers["X-Total-Count"] =
+        parts.TotalCount.ToString(
+            System.Globalization.CultureInfo.InvariantCulture);
+
     return Results.Ok(parts.Items);
 });
 app.MapPost("/parts/add", async (
@@ -205,6 +213,15 @@ app.MapPut("/parts/{id}", async (
     {
         return Results.NotFound();
     }
+});
+
+app.MapDelete("/parts/{id:guid}", async (
+    Guid id,
+    ISender mediator,
+    CancellationToken cancellationToken) =>
+{
+    var deleted = await mediator.Send(new DeletePart(id), cancellationToken);
+    return deleted ? Results.NoContent() : Results.NotFound();
 });
 
 app.MapGet("parts/view", async (
@@ -271,7 +288,7 @@ app.MapPost("/parts/install",
 
         return Results.Ok(new
         {
-            Message = "Part installed and car price updated.",
+            Message = "Part installed.",
             PartId = partId
         });
     });
