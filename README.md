@@ -1,4 +1,4 @@
-# CarsAPI — Full-Stack Car and Parts Management
+# A Full-Stack Car and Parts Management
 
 A full-stack application built during my GN TEQ internship while learning React, Next.js, ASP.NET Core, and SQL Server.
 
