@@ -1,0 +1,86 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="cars-frontend\app\about\page.tsx" />
+    <None Remove="cars-frontend\app\AvailabilityMessage.tsx" />
+    <None Remove="cars-frontend\app\CarAvailability.tsx" />
+    <None Remove="cars-frontend\app\CarBanner.tsx" />
+    <None Remove="cars-frontend\app\CarFetchDemo.tsx" />
+    <None Remove="cars-frontend\app\CarFilter.tsx" />
+    <None Remove="cars-frontend\app\CarForm.tsx" />
+    <None Remove="cars-frontend\app\CarPhoto.tsx" />
+    <None Remove="cars-frontend\app\CarSearch.tsx" />
+    <None Remove="cars-frontend\app\cars\[id]\loading.tsx" />
+    <None Remove="cars-frontend\app\cars\[id]\page.tsx" />
+    <None Remove="cars-frontend\app\ConnectionStatus.tsx" />
+    <None Remove="cars-frontend\app\file.tsx" />
+    <None Remove="cars-frontend\app\HorsepowerTracker.tsx" />
+    <None Remove="cars-frontend\app\LanguageProvider.tsx" />
+    <None Remove="cars-frontend\app\useCounter.tsx" />
+    <None Remove="cars-frontend\app\useOnlineStatus.ts" />
+    <None Remove="cars-frontend\app\UsernameContext.tsx" />
+    <None Remove="cars-frontend\app\UsernameEditor.tsx" />
+    <None Remove="cars-frontend\app\UserProfile.tsx" />
+    <None Remove="cars-frontend\components\cars\CarDetailsView.tsx" />
+    <None Remove="cars-frontend\components\cars\ThemeToggle.tsx" />
+    <None Remove="cars-frontend\ThemeProvider.tsx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.2.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
+    <PackageReference Include="MediatR" Version="14.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.14">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="7.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Scalar.AspNetCore" Version="2.18.3" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="cars-frontend\app\about\page.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\AvailabilityMessage.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\CarAvailability.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\CarBanner.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\CarFetchDemo.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\CarFilter.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\CarForm.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\CarPhoto.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\CarSearch.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\cars\[id]\loading.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\cars\[id]\page.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\ConnectionStatus.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\file - Copy.tsx">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="cars-frontend\app\file.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\HorsepowerTracker.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\LanguageProvider.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\useCounter.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\useOnlineStatus.ts" />
+    <TypeScriptCompile Include="cars-frontend\app\UsernameContext.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\UsernameEditor.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\UserProfile.tsx" />
+    <TypeScriptCompile Include="cars-frontend\components\cars\CarDetailsView.tsx" />
+    <TypeScriptCompile Include="cars-frontend\app\ThemeProvider.tsx" />
+    <TypeScriptCompile Include="cars-frontend\components\cars\ThemeToggle.tsx" />
+  </ItemGroup>
+
+</Project>

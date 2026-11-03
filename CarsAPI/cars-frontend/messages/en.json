@@ -1,0 +1,105 @@
+{
+  "Common": {
+    "dashboard": "Dashboard",
+    "about": "About",
+    "home": "Home",
+    "language": "Language",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back to dashboard",
+    "available": "Available",
+    "sold": "Sold",
+    "toggleTheme": "Toggle dark mode",
+    "skip": "Skip to main content"
+  },
+  "Card": {
+    "toggle": "Toggle availability",
+    "edit": "Edit car",
+    "delete": "Delete car"
+  },
+  "Form": {
+    "editTitle": "Edit car",
+    "addTitle": "Add new car",
+    "editDescription": "Update the car details.",
+    "addDescription": "Enter the car details to add it to your collection.",
+    "make": "Make",
+    "model": "Model",
+    "year": "Year",
+    "horsepower": "Horsepower",
+    "price": "Price (optional)",
+    "color": "Color (optional)",
+    "makePlaceholder": "Enter car make",
+    "modelPlaceholder": "Enter car model",
+    "yearPlaceholder": "Enter car year",
+    "colorPlaceholder": "Blue",
+    "saving": "Saving...",
+    "save": "Save changes",
+    "add": "Add car",
+    "invalidPrice": "Please enter a valid price.",
+    "invalidDetails": "Please enter valid car details.",
+    "saveError": "Could not save car."
+  },
+  "Delete": {
+    "title": "Delete car?",
+    "description": "Remove {make} {model} from your collection?",
+    "deleting": "Deleting...",
+    "delete": "Delete car",
+    "error": "Could not delete car."
+  },
+  "Details": {
+    "loading": "Loading car details...",
+    "notFound": "Car not found.",
+    "year": "Year: {value}",
+    "horsepower": "Horsepower: {value} HP",
+    "price": "Price: {value}",
+    "color": "Color: {value}",
+    "notProvided": "Not provided",
+    "error": "Could not load car."
+  },
+  "About": {
+    "title": "About us",
+    "welcome": "Welcome to the About page!",
+    "description": "We are a company dedicated to providing the best car services.",
+    "internship": "Internship at GN TEQ"
+  },
+  "Errors": {
+    "loadCars": "Could not load cars.",
+    "loadCar": "Could not load car.",
+    "save": "Could not save car.",
+    "delete": "Could not delete car.",
+    "availability": "Could not update availability.",
+    "network": "Could not connect to the server. Please try again.",
+    "invalidPrice": "Please enter a valid price.",
+    "invalidDetails": "Please enter valid car details.",
+    "pagination": "Pagination information is missing. Restart the updated CarsAPI server."
+  },
+  "Dashboard": {
+    "filterLabel": "Filter by availability",
+    "retry": "Retry loading cars",
+    "searchPlaceholder": "Search by make or model",
+    "searchLabel": "Search cars",
+    "title": " Cars Dashboard",
+    "description": "Manage your car inventory with ease. Add, edit, and delete cars, and keep track of their availability.",
+    "addCar": "Add New Car",
+    "sold": "Sold",
+    "available": "Available",
+    "all": "All",
+    "clearFilter": "Clear Filter",
+    "loading": "Loading cars...",
+    "noCars": "No cars found.",
+    "results": "Showing {count} results of {total} cars",
+    "listLabel": "Car listings",
+    "pagination": "Car pages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}"
+  },
+  "Validation": {
+    "required": "This field is required.",
+    "max50": "Use no more than 50 characters.",
+    "year": "Enter a whole year between 1886 and {maxYear}.",
+    "horsepower": "Enter a whole number between 1 and 2,147,483,647.",
+    "price": "Enter a valid price of zero or more.",
+    "color": "Use no more than 30 characters."
+  }
+}

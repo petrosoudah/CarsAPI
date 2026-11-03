@@ -1,0 +1,105 @@
+{
+  "Common": {
+    "dashboard": "Panel",
+    "about": "Acerca de",
+    "home": "Inicio",
+    "language": "Idioma",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "back": "Volver al panel",
+    "available": "Disponible",
+    "sold": "Vendido",
+    "toggleTheme": "Alternar modo oscuro",
+    "skip": "Ir al contenido principal"
+  },
+  "Card": {
+    "toggle": "Cambiar disponibilidad",
+    "edit": "Editar coche",
+    "delete": "Eliminar coche"
+  },
+  "Form": {
+    "editTitle": "Editar coche",
+    "addTitle": "Añadir un coche",
+    "editDescription": "Actualiza los datos del coche.",
+    "addDescription": "Introduce los datos del coche para añadirlo a tu colección.",
+    "make": "Marca",
+    "model": "Modelo",
+    "year": "Año",
+    "horsepower": "Potencia",
+    "price": "Precio (opcional)",
+    "color": "Color (opcional)",
+    "makePlaceholder": "Introduce la marca",
+    "modelPlaceholder": "Introduce el modelo",
+    "yearPlaceholder": "Introduce el año",
+    "colorPlaceholder": "Azul",
+    "saving": "Guardando...",
+    "save": "Guardar cambios",
+    "add": "Añadir coche",
+    "invalidPrice": "Introduce un precio válido.",
+    "invalidDetails": "Introduce datos válidos para el coche.",
+    "saveError": "No se pudo guardar el coche."
+  },
+  "Delete": {
+    "title": "¿Eliminar el coche?",
+    "description": "¿Quieres eliminar {make} {model} de tu colección?",
+    "deleting": "Eliminando...",
+    "delete": "Eliminar coche",
+    "error": "No se pudo eliminar el coche."
+  },
+  "Details": {
+    "loading": "Cargando los datos del coche...",
+    "notFound": "No se encontró el coche.",
+    "year": "Año: {value}",
+    "horsepower": "Potencia: {value} HP",
+    "price": "Precio: {value}",
+    "color": "Color: {value}",
+    "notProvided": "Sin especificar",
+    "error": "No se pudo cargar el coche."
+  },
+  "About": {
+    "title": "Acerca de nosotros",
+    "welcome": "¡Bienvenido a la página Acerca de!",
+    "description": "Somos una empresa dedicada a ofrecer los mejores servicios para coches.",
+    "internship": "Prácticas en GN TEQ"
+  },
+  "Errors": {
+    "loadCars": "No se pudieron cargar los coches.",
+    "loadCar": "No se pudo cargar el coche.",
+    "save": "No se pudo guardar el coche.",
+    "delete": "No se pudo eliminar el coche.",
+    "availability": "No se pudo actualizar la disponibilidad.",
+    "network": "No se pudo conectar con el servidor. Inténtalo de nuevo.",
+    "invalidPrice": "Introduce un precio válido.",
+    "invalidDetails": "Introduce datos válidos para el coche.",
+    "pagination": "Faltan los datos de paginación. Reinicia el servidor CarsAPI actualizado."
+  },
+  "Dashboard": {
+    "filterLabel": "Filtrar por disponibilidad",
+    "retry": "Volver a cargar los coches",
+    "searchPlaceholder": "Buscar por marca o modelo",
+    "searchLabel": "Buscar coches",
+    "title": "Panel de coches",
+    "description": "Gestiona tu inventario de coches con facilidad. Añade, edita y elimina coches, y lleva un registro de su disponibilidad.",
+    "addCar": "Añadir Nuevo Coche",
+    "sold": "Vendido",
+    "available": "Disponible",
+    "all": "Todos",
+    "clearFilter": "Borrar Filtro",
+    "loading": "Cargando coches...",
+    "noCars": "No se encontraron coches.",
+    "results": "Mostrando {count} resultados de {total} coches",
+    "listLabel": "Lista de coches",
+    "pagination": "Páginas de coches",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "page": "Página {page} de {pages}"
+  },
+  "Validation": {
+    "required": "Este campo es obligatorio.",
+    "max50": "Usa un máximo de 50 caracteres.",
+    "year": "Introduce un año entero entre 1886 y {maxYear}.",
+    "horsepower": "Introduce un número entero entre 1 y 2.147.483.647.",
+    "price": "Introduce un precio válido de cero o más.",
+    "color": "Usa un máximo de 30 caracteres."
+  }
+}

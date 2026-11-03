@@ -1,0 +1,283 @@
+using CarsAPI.Data;
+using CarsAPI.handlers_and_commands;
+using CarsAPI.Validators;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
+using System.Reflection;
+using FluentValidation;
+using Microsoft.Extensions.Options;
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddValidatorsFromAssemblyContaining<AddCarsValidator>();
+
+// Add services to the container.
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString(
+            "SqlServerConnection")));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CarsAPI.Behaviors.ValidationBehavior<,>));
+var frontendOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? (builder.Environment.IsDevelopment() ? ["http://localhost:3000"] : []);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy.WithOrigins(frontendOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .WithExposedHeaders("X-Total-Count");
+    });
+});
+
+
+
+
+var app = builder.Build();
+app.UseHttpsRedirection();
+app.UseCors("Frontend");
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider
+        .GetRequiredService<AppDbContext>();
+
+    await dbContext.Database.MigrateAsync();
+}
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var exception = context.Features
+            .Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()
+            ?.Error;
+
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+        if (exception is FluentValidation.ValidationException validationException)
+        {
+            var errors = validationException.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(e => e.ErrorMessage).ToArray());
+
+            context.Response.StatusCode = 400;
+
+            await Results.ValidationProblem(errors)
+                .ExecuteAsync(context);
+
+            return;
+        }
+
+        logger.LogError(
+            exception,
+            "Unhandled exception while processing {Method} {Path}",
+            context.Request.Method,
+            context.Request.Path);
+        context.Response.StatusCode = 500;
+        await Results.Problem(statusCode: 500)
+            .ExecuteAsync(context);
+    });
+});
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
+
+app.MapGet("/cars", async (
+    ISender mediator,
+    HttpResponse response,
+    CancellationToken cancellationToken,
+    int pageNumber = 1,
+    int pageSize = Pagination.DefaultPageSize,
+    string? search = null,
+    bool? isAvailable = null) =>
+{
+    if (!Pagination.IsValid(pageNumber, pageSize))
+        return Results.BadRequest("Page number must be positive and page size must be between 1 and 100.");
+
+    var cars = await mediator.Send(new ListCars(pageNumber, pageSize, search, isAvailable), cancellationToken);
+    response.Headers["X-Total-Count"] = cars.TotalCount.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    return Results.Ok(cars.Items);
+});
+app.MapGet("/cars/{id}", async (
+    int id,
+    ISender mediator) =>
+{
+    try
+    {
+        var car = await mediator.Send(new CarById(id));
+        return Results.Ok(car);
+    }
+    catch (KeyNotFoundException)
+    {
+        return Results.NotFound();
+    }
+});
+app.MapPut("/cars/{id}", async (
+    int id,
+    UpdateCar command,
+    ISender mediator) =>
+{
+    if (id != command.Id)
+        return Results.BadRequest("IDs do not match.");
+
+    try
+    {
+        var updatedCar = await mediator.Send(command);
+        return Results.Ok(updatedCar);
+    }
+    catch (KeyNotFoundException)
+    {
+        return Results.NotFound();
+    }
+});
+app.MapPost("/cars", async (AddCars command, ISender mediator) =>
+{
+    var result = await mediator.Send(command);
+    return Results.Created($"/cars/{result.Id}", result);
+});
+app.MapDelete("/cars/{id}", async (
+    int id,
+    ISender mediator) =>
+{
+    var deleted = await mediator.Send(
+        new DeleteCar { Id = id });
+
+    return deleted
+        ? Results.NoContent()
+        : Results.NotFound();
+});
+
+app.MapGet("/parts/list", async (
+    ISender mediator,
+    int pageNumber = 1,
+    int pageSize = Pagination.DefaultPageSize) =>
+{
+    if (!Pagination.IsValid(pageNumber, pageSize))
+        return Results.BadRequest("Page number must be positive and page size must be between 1 and 100.");
+
+    var parts = await mediator.Send(new GetParts(pageNumber, pageSize));
+    return Results.Ok(parts.Items);
+});
+app.MapPost("/parts/add", async (
+    AddParts command,
+    ISender mediator) =>
+{
+    var addedPart = await mediator.Send(command);
+    return Results.Created(
+        $"/parts/{addedPart.Id}", addedPart);
+});
+app.MapGet("/parts/{id}", async (
+    Guid id,
+    ISender mediator) =>
+{
+    try
+    {
+        var part = await mediator.Send(new GetPartById(id));
+        return Results.Ok(part);
+    }
+    catch (KeyNotFoundException)
+    {
+        return Results.NotFound();
+    }
+});
+app.MapPut("/parts/{id}", async (
+    Guid id,
+    UpdatePart command,
+    ISender mediator) =>
+{
+    if (id != command.Id)
+        return Results.BadRequest("IDs do not match.");
+    try
+    {
+        var updatedPart = await mediator.Send(command);
+        return Results.Ok(updatedPart);
+    }
+    catch (KeyNotFoundException)
+    {
+        return Results.NotFound();
+    }
+});
+
+app.MapGet("parts/view", async (
+    ISender mediator,
+    int pageNumber = 1,
+    int pageSize = Pagination.DefaultPageSize) =>
+{
+    if (!Pagination.IsValid(pageNumber, pageSize))
+        return Results.BadRequest("Page number must be positive and page size must be between 1 and 100.");
+
+    var parts = await mediator.Send(new GetCarPartsView(pageNumber, pageSize));
+    return Results.Ok(parts.Items);
+});
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapGet("/debug/database", (AppDbContext context) =>
+    {
+        return Results.Ok(new
+        {
+            DatabasePath = context.Database.GetDbConnection().DataSource,
+            DatabaseName = context.Database.GetDbConnection().Database
+        });
+    });
+}
+
+app.MapGet("/cars/by-make/{make}",
+    async (string make, ISender mediator, int pageNumber = 1, int pageSize = Pagination.DefaultPageSize) =>
+    {
+        if (!Pagination.IsValid(pageNumber, pageSize))
+            return Results.BadRequest("Page number must be positive and page size must be between 1 and 100.");
+
+        var cars = await mediator.Send(new GetCarsByMake(make, pageNumber, pageSize));
+        return Results.Ok(cars.Items);
+    });
+app.MapPut("/cars/{id}/price",
+    async (int id, decimal newPrice, ISender mediator) =>
+    {
+        int rowsAffected = await mediator.Send(
+            new UpdateCarPrice(id, newPrice));
+
+        if (rowsAffected == 0)
+            return Results.NotFound($"Car with ID {id} was not found.");
+
+        return Results.Ok("Car price updated successfully.");
+    });
+
+app.MapGet("/cars/by-year/{year}",
+    async (int year, ISender mediator, int pageNumber = 1, int pageSize = Pagination.DefaultPageSize) =>
+    {
+        if (!Pagination.IsValid(pageNumber, pageSize))
+            return Results.BadRequest("Page number must be positive and page size must be between 1 and 100.");
+
+        var cars = await mediator.Send(new GetCarByYear(year, pageNumber, pageSize));
+        return Results.Ok(cars.Items);
+    });
+app.MapPost("/parts/install",
+    async (InstallPart command, ISender mediator) =>
+    {
+        var partId = await mediator.Send(command);
+
+        if (partId == null)
+            return Results.NotFound("Car not found.");
+
+        return Results.Ok(new
+        {
+            Message = "Part installed and car price updated.",
+            PartId = partId
+        });
+    });
+
+
+
+
+
+app.Run();
