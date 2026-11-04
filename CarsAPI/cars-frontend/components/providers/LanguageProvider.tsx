@@ -6,7 +6,7 @@ import ar from "@/messages/ar.json";
 import es from "@/messages/es.json";
 import { startTransition, useEffect, useState, type ReactNode } from "react";
 import { DirectionProvider } from "@base-ui/react/direction-provider";
-import { getLanguage, subscribeLanguage, type Language } from "@/lib/i18n/language-store";
+import { getLanguage, subscribeLanguage, type Language } from "@/lib/language-store";
 
 const dictionaries = { en, ar, es };
 

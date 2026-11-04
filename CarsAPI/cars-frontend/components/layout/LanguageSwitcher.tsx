@@ -4,7 +4,7 @@ import {
 
     setLanguage,
     type Language,
-} from "@/lib/i18n/language-store";
+} from "@/lib/language-store";
 
 
 
