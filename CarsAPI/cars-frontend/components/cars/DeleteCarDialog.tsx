@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import useTranslatedError from "./useTranslatedError";
-import { deleteCar, type Car } from "@/lib/cars-api";
+import useTranslatedError from "@/hooks/useTranslatedError";
+import { deleteCar, type Car } from "@/lib/api/cars-api";
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
     AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle

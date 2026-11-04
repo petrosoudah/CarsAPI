@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
-import { getCar, type Car } from "@/lib/cars-api";
+import { getCar, type Car } from "@/lib/api/cars-api";
 import { Badge } from "@/components/ui/badge";
 import { useFormatter, useTranslations } from "next-intl";
-import useTranslatedError from "./useTranslatedError";
+import useTranslatedError from "@/hooks/useTranslatedError";
 
 type CarDetailsViewProps = {
     id: string;
@@ -64,9 +64,9 @@ export default function CarDetailsView({ id }: CarDetailsViewProps) {
                 {common(car.isAvailable ? "available" : "sold")}
             </Badge>
 
-            <p>{t("year", { value: car.year })}</p>
+            <p className="font-bold text-2xl">{t("year", { value: car.year })}</p>
             <p>{t("horsepower", { value: format.number(car.horsepower) })}</p>
-            <p>{t("price", { value: car.price === null ? t("notProvided") : format.number(car.price) })}</p>
+            <p> {t("price", { value: car.price === null ? t("notProvided") : format.number(car.price) })}</p>
             <p>{t("color", { value: car.color ?? t("notProvided") })}</p>
         </section>
     );

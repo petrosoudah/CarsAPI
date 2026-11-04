@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getParts, PARTS_PAGE_SIZE, type Part } from "@/lib/parts-api";
+import { getParts, PARTS_PAGE_SIZE, type Part } from "@/lib/api/parts-api";
 import PartForm from "@/components/parts/PartForm";
 import DeletePartDialog from "@/components/parts/DeletePartDialog";
 import { Button } from "@/components/ui/button";
 import { useFormatter, useTranslations } from "next-intl";
-import useTranslatedError from "@/components/cars/useTranslatedError";
+import useTranslatedError from "@/hooks/useTranslatedError";
 
 export default function PartsPage() {
     const t = useTranslations("Parts");
@@ -100,7 +100,7 @@ export default function PartsPage() {
                         {parts.length === 0 ? <p>{t("empty")}</p> : (
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 {parts.map(part => (
-                                    <article key={part.id} className="min-w-0 space-y-2 rounded-xl border bg-card p-4 text-card-foreground">
+                                    <article key={part.id} className="partCard">
                                         <h2 className="break-words font-semibold"><bdi>{part.manufacturer}</bdi></h2>
                                         <p className="break-words">{part.description}</p>
                                         <p>{t("price", { value: format.number(part.price, {

@@ -6,7 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using System.Reflection;
 using FluentValidation;
-using Microsoft.Extensions.Options;
+using CarsAPI.Exceptions;
+using CarsAPI.Learning;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddValidatorsFromAssemblyContaining<AddCarsValidator>();
 
@@ -56,18 +57,26 @@ app.UseExceptionHandler(errorApp =>
             ?.Error;
 
         var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-
         if (exception is FluentValidation.ValidationException validationException)
         {
             var errors = validationException.Errors
-                .GroupBy(e => e.PropertyName)
+                .GroupBy(error => error.PropertyName)
                 .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(e => e.ErrorMessage).ToArray());
-
-            context.Response.StatusCode = 400;
+                    group => group.Key,
+                    group => group.Select(error => error.ErrorMessage).ToArray());
 
             await Results.ValidationProblem(errors)
+                .ExecuteAsync(context);
+
+            return;
+        }
+
+        if (exception is ConflictException conflictException)
+        {
+            await Results.Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Conflict",
+                detail: conflictException.Message)
                 .ExecuteAsync(context);
 
             return;
@@ -89,6 +98,25 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+
+
+    app.MapPost("/learning/transaction-scope", async (
+        AppDbContext context,
+        CancellationToken cancellationToken,
+        bool simulateFailure = false) =>
+    {
+        var carId = await TransactionScopeDemo.RunAsync(
+            context,
+            simulateFailure,
+            cancellationToken);
+
+        return Results.Ok(new
+        {
+            carId,
+            message = "Transaction committed."
+        });
+    });
+
 }
 
 app.MapGet("/cars", async (
@@ -292,8 +320,6 @@ app.MapPost("/parts/install",
             PartId = partId
         });
     });
-
-
 
 
 

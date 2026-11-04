@@ -1,42 +1,62 @@
 "use client";
 
-import type { Car } from "@/lib/cars-api";
+import type { Car } from "@/lib/api/cars-api";
+import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import useCarActions from "@/hooks/useCarActions";
+import useTranslatedError from "@/hooks/useTranslatedError";
 
 type CarCardProps = {
     car: Car;
     busy: boolean;
-    onToggle: () => void;
-    onEdit: () => void;
-    onDelete: () => void;
+    onUpdated: (updatedCar: Car) => void;
+    onEdit: (car: Car) => void;
+    onDelete: (car: Car) => void;
 };
 
-export default function CarCard({ car, busy, onToggle, onEdit, onDelete }: CarCardProps) {
+function CarCard({ car, busy, onUpdated, onEdit, onDelete }: CarCardProps) {
     const t = useTranslations("Card");
     const common = useTranslations("Common");
+    const translateError = useTranslatedError();
+    const { pending, error, toggleAvailability } = useCarActions(car, onUpdated);
+    const disabled = busy || pending;
     return (
-        <Card className="min-w-0">
+        <Card className="carCard" aria-busy={pending}>
             <CardHeader>
-                <h2 className="font-semibold">
-                    <Link href={"/cars/" + car.id} className="break-words hover:underline">
-                        <bdi>{car.make} {car.model}</bdi> ({car.year})
+                <h2 className="carTitle">
+                    <Link
+                        href={"/cars/" + car.id}
+                        className="break-words hover:underline"
+                    >
+                        <bdi>{car.make} {car.model}</bdi>
                     </Link>
                 </h2>
+
+                <p className="carSubtitle">
+                    {car.year}
+                </p>
             </CardHeader>
             <CardContent>
-                <Badge variant={car.isAvailable ? "default" : "secondary"}>
+                <Badge className={car.isAvailable ? "statusAvalabile" : "statusSold"} variant={car.isAvailable ? "default" : "secondary"}>
                     {common(car.isAvailable ? "available" : "sold")}
                 </Badge>
+                {error && <p role="alert" className="mt-2 text-sm text-destructive">{translateError(error)}</p>}
             </CardContent>
-            <CardFooter className="flex-wrap gap-2">
-                <Button disabled={busy} onClick={onToggle}>{t("toggle")}</Button>
-                <Button disabled={busy} variant="outline" onClick={onEdit}>{t("edit")}</Button>
-                <Button disabled={busy} variant="destructive" onClick={onDelete}>{t("delete")}</Button>
+            <CardFooter className="carActions">
+                <Button disabled={disabled} className="carButton"  variant="default" onClick={() => onEdit(car)}>{t("edit")}</Button>
+                <Button disabled={disabled} className="carButton" variant="destructive" onClick={() => onDelete(car)}>{t("delete")}</Button>
+                <Button  disabled={disabled} className="carButton" variant="outline" onClick={toggleAvailability}>{t(car.isAvailable ? "markSold" : "markAvailable")}</Button>
+
             </CardFooter>
         </Card>
     );
 }
+
+// Unchanged cars keep their object identity; callbacks are stable in the dashboard.
+const MemoizedCarCard = memo(CarCard);
+MemoizedCarCard.displayName = "CarCard";
+export default MemoizedCarCard;

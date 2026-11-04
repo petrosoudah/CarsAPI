@@ -3,15 +3,15 @@
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
 
-type CarFilterProps = {
+type CarSearchInputProps = {
     search: string;
     onSearchChange: (value: string) => void;
 };
 
-export default function CarFilter({
+export default function CarSearchInput({
     search,
     onSearchChange
-}: CarFilterProps) {
+}: CarSearchInputProps) {
     const t = useTranslations("Dashboard");
     return (
         <Input

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import useTranslatedError from "./useTranslatedError";
-import { CarValidationError, saveCar, type Car } from "@/lib/cars-api";
-import { validateCar, type CarFieldErrors, type CarFormValues } from "@/lib/car-validation";
+import useTranslatedError from "@/hooks/useTranslatedError";
+import { CarValidationError, saveCar, type Car } from "@/lib/api/cars-api";
+import { validateCar, type CarFieldErrors, type CarFormValues } from "@/lib/validation/car-validation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -25,6 +25,7 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
         year: car ? String(car.year) : "", horsepower: car ? String(car.horsepower) : "",
         price: car?.price?.toString() ?? "", color: car?.color ?? "",
     });
+    const initialValues = useRef(values);
     const [fieldErrors, setFieldErrors] = useState<CarFieldErrors>({});
     const [serverErrors, setServerErrors] = useState<Partial<Record<keyof CarFormValues, string>>>({});
     const [saving, setSaving] = useState(false);
@@ -96,19 +97,46 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
         { name: "price", type: "number", placeholder: "20000", min: 0, step: "0.01" },
         { name: "color", type: "text", placeholder: t("colorPlaceholder"), maxLength: 30 },
     ];
+    function hasUnsavedChanges() {
+        return Object.keys(values).some(key => {
+            const field = key as keyof CarFormValues;
 
+            return values[field] !== initialValues.current[field];
+
+        })
+
+      
+    }
+    function requestClose() {
+        if (saving) return;
+        if (hasUnsavedChanges()) {
+            const discard = window.confirm(t("discardConfirm"));
+            if (!discard) return;
+        }
+        onClose();
+    }
     return (
-        <Dialog open onOpenChange={open => { if (!open && !saving) onClose(); }}>
-            <DialogContent className="max-h-[85dvh] overflow-y-auto" closeLabel={common("close")} showCloseButton={!saving}>
+        <Dialog
+            open
+            onOpenChange={open => {
+                if (!open) requestClose();
+            }}
+        >            <DialogContent className="max-h-[85dvh] overflow-y-auto" closeLabel={common("close")} showCloseButton={!saving}>
                 <DialogHeader>
                     <DialogTitle>{t(car ? "editTitle" : "addTitle")}</DialogTitle>
-                    <DialogDescription>{t(car ? "editDescription" : "addDescription")}</DialogDescription>
+                    <DialogDescription>{t(car ? "editDescription" : "addDescription")}
+                        {" "}
+
+                        {t("requiredHint")}
+                    </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} noValidate className="space-y-4">
                     {fields.map(({ name, placeholder, ...attributes }) => {
                         const message = fieldErrors[name]
                             ? validation(fieldErrors[name], { maxYear })
                             : serverErrors[name];
+                        const hintId = name === "year" ? "car-year-hint" : undefined;
+                        const errorId = message ? "car-" + name + "-error" : undefined;
                         return (
                             <div key={name} className="space-y-2">
                                 <label htmlFor={"car-" + name} className="text-sm font-medium">{t(name)}</label>
@@ -116,11 +144,18 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
                                     disabled={saving} value={values[name]}
                                     onChange={event => updateField(name, event.target.value)}
                                     aria-invalid={Boolean(message)}
-                                    aria-describedby={message ? "car-" + name + "-error" : undefined} />
+                                    aria-describedby={[hintId, errorId].filter(Boolean).join(" ") || undefined} />
+                                {name === "year" && (
+                                    <p id={hintId} className="text-sm text-muted-foreground">
+                                        {t("yearHint", { maxYear })}
+                                    </p>
+                                )}
                                 {message && <p id={"car-" + name + "-error"} className="text-sm text-destructive">{message}</p>}
+                              
                             </div>
                         );
                     })}
+                    
                     {error && <p role="alert" className="text-sm text-destructive">{translateError(error)}</p>}
                     <div className="flex flex-wrap justify-end gap-2">
                         <DialogClose disabled={saving} render={<Button type="button" variant="outline" />}>

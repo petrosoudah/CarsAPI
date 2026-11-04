@@ -1,4 +1,17 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cars Dashboard
+
+A Next.js and TypeScript frontend for CarsAPI, with Cars/Parts management, English/Arabic/Spanish translations, and light/dark themes.
+
+## Code organization
+
+- `app/`: Next.js routes, root layout, and global Tailwind styles.
+- `components/`: Cars/Parts UI, shared layout controls, providers, and UI primitives.
+- `hooks/`: reusable React state and request logic.
+- `lib/api/`, `lib/validation/`, `lib/i18n/`: HTTP clients, validation, and language storage.
+- `practice/`: preserved learning exercises with descriptive filenames.
+- `tests/e2e/`: browser regression tests using mocked APIs.
+
+Read the [folder guide](docs/project-structure.md) for file locations and organization rules.
 
 ## Getting Started
 
@@ -18,7 +31,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Fonts and reusable theme styles are defined in `app/globals.css`.
 
 ## Learn More
 

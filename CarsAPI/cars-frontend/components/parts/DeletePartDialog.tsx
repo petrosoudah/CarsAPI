@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { deletePart, type Part } from "@/lib/parts-api";
-import useTranslatedError from "@/components/cars/useTranslatedError";
+import { deletePart, type Part } from "@/lib/api/parts-api";
+import useTranslatedError from "@/hooks/useTranslatedError";
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
     AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,

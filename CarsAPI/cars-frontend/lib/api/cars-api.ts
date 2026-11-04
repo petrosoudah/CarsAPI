@@ -104,7 +104,7 @@ export async function saveCar(details: CarDetails, car: Car | null): Promise<Car
 export async function deleteCar(id: number): Promise<void> {
     const response = await fetch(CARS_URL + "/" + id, { method: "DELETE" });
     if (!response.ok) {
-        throw new Error("Could not delete car (" + response.status + ").");
+        throw await readApiError(response, "Could not delete car (" + response.status + ").");
     }
 }
 

@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
-import { Badge } from "../components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { Card } from "@/components/ui/card";
 
 
 type CarProps = {
@@ -14,16 +15,16 @@ type CarProps = {
  
 };
 
-export default function CarCard(props: CarProps) {
+export default function LegacyCarCard(props: CarProps) {
     
 
     return (
         <div>
-            <h2 className="font-semibold">
+            <Card className="CarCard">
                 <Link href={"/cars/" + props.id} className="hover:underline">
                     {props.make} {props.model} ({props.year})
                 </Link>
-            </h2>
+            </Card>
             <p>Status: {props.isAvailable ? "Available" : "Sold"}</p>
             <Badge variant={props.isAvailable ? "default" : "secondary"}>
                 {props.isAvailable ? "Available" : "Sold"}

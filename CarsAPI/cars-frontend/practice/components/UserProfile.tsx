@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useUsername } from "./UsernameContext";
+import { useUsername } from "@/practice/context/UsernameContext";
 
 export default function UserProfile() {
     const { username } = useUsername();

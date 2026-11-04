@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 import type { FormEvent } from "react"; 
-import { Button } from "../components/ui/button";
+import { Button } from "@/components/ui/button";
 export default function CarForm() {
     const [make, setMake] = useState("");
     const [model, setModel] = useState("");

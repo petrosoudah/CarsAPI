@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 import { useState, useRef } from "react";
-import { Button } from "../components/ui/button";
+import { Button } from "@/components/ui/button";
 
 export default function CarSearch() {
     const inputRef = useRef<HTMLInputElement>(null);

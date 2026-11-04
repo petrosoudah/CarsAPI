@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import type { Part, PartDetails } from "../../lib/parts-api";
+import type { Part, PartDetails } from "../../lib/api/parts-api";
 
 type SavedPart = PartDetails & { id?: string };
 type SaveFailure = { status: number; body?: unknown; plain?: string };

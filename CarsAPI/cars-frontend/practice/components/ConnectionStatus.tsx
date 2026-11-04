@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useOnlineStatus }  from "./useOnlineStatus";
+import { useOnlineStatus }  from "@/practice/hooks/useOnlineStatus";
 
 export default function ConnectionStatus() {
     const isOnline = useOnlineStatus();

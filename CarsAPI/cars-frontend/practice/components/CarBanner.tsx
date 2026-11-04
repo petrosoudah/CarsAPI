@@ -1,5 +1,5 @@
-﻿import Image from "next/image";
-import bannerPhoto from "../public/car-banner.jpg";
+import Image from "next/image";
+import bannerPhoto from "@/public/car-banner.jpg";
 
 export default function CarBanner() {
     return (

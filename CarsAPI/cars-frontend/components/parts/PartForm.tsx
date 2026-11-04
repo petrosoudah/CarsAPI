@@ -4,10 +4,10 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { addPart, getCarsForPartForm, PartValidationError, updatePart, type Part } from "@/lib/parts-api";
-import { validatePart, type PartField, type PartFieldErrors, type PartFormValues } from "@/lib/part-validation";
-import type { Car } from "@/lib/cars-api";
-import useTranslatedError from "@/components/cars/useTranslatedError";
+import { addPart, getCarsForPartForm, PartValidationError, updatePart, type Part } from "@/lib/api/parts-api";
+import { validatePart, type PartField, type PartFieldErrors, type PartFormValues } from "@/lib/validation/part-validation";
+import type { Car } from "@/lib/api/cars-api";
+import useTranslatedError from "@/hooks/useTranslatedError";
 
 type PartFormProps = {
     part?: Part | null;

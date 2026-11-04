@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 import { Component } from "react";
 import Image from "next/image";
-import carPhoto from "../public/car-banner.jpg";
+import carPhoto from "@/public/car-banner.jpg";
 type CarPhotoProps = {
     caption?: string;
 };

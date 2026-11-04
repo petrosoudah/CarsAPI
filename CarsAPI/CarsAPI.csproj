@@ -29,8 +29,10 @@
     <None Remove="cars-frontend\app\UsernameEditor.tsx" />
     <None Remove="cars-frontend\app\UserProfile.tsx" />
     <None Remove="cars-frontend\components\cars\CarDetailsView.tsx" />
+    <None Remove="cars-frontend\components\cars\LanguageSwitcher.tsx" />
     <None Remove="cars-frontend\components\cars\ThemeToggle.tsx" />
     <None Remove="cars-frontend\components\parts\PartForm.tsx" />
+    <None Remove="cars-frontend\hooks\useCarActions.ts" />
     <None Remove="cars-frontend\lib\parts-api.ts" />
     <None Remove="cars-frontend\ThemeProvider.tsx" />
   </ItemGroup>
@@ -84,8 +86,10 @@
     <TypeScriptCompile Include="cars-frontend\app\UserProfile.tsx" />
     <TypeScriptCompile Include="cars-frontend\components\cars\CarDetailsView.tsx" />
     <TypeScriptCompile Include="cars-frontend\app\ThemeProvider.tsx" />
+    <TypeScriptCompile Include="cars-frontend\components\cars\LanguageSwitcher.tsx" />
     <TypeScriptCompile Include="cars-frontend\components\cars\ThemeToggle.tsx" />
     <TypeScriptCompile Include="cars-frontend\components\parts\PartForm.tsx" />
+    <TypeScriptCompile Include="cars-frontend\hooks\useCarActions.ts" />
     <TypeScriptCompile Include="cars-frontend\lib\parts-api.ts" />
   </ItemGroup>
 

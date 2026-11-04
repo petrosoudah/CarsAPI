@@ -1,4 +1,4 @@
-import { getCars, type Car } from "@/lib/cars-api";
+import { getCars, type Car } from "@/lib/api/cars-api";
 
 export type Part = {
     id: string;
