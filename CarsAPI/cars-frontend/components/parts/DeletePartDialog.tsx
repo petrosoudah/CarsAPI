@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { deletePart, type Part } from "@/lib/api/parts-api";
 import useTranslatedError from "@/hooks/useTranslatedError";
@@ -21,21 +22,20 @@ export default function DeletePartDialog({ part, onClose, onDeleted, onDeletingC
     const common = useTranslations("Common");
     const translateError = useTranslatedError();
     const cancelRef = useRef<HTMLButtonElement>(null);
-    const [deleting, setDeleting] = useState(false);
+    const mutation = useMutation({ mutationFn: deletePart });
+    const deleting = mutation.isPending;
     const [error, setError] = useState("");
 
     async function handleDelete() {
         if (deleting) return;
-        setDeleting(true);
         onDeletingChange(true);
         setError("");
         try {
-            await deletePart(part.id);
+            await mutation.mutateAsync(part.id);
             onDeleted(part.id);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Could not delete part.");
         } finally {
-            setDeleting(false);
             onDeletingChange(false);
         }
     }

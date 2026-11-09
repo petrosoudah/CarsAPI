@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, type FormEvent } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import useTranslatedError from "@/hooks/useTranslatedError";
 import { CarValidationError, saveCar, type Car } from "@/lib/api/cars-api";
@@ -29,7 +30,10 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
     const initialValues = useRef(values);
     const [fieldErrors, setFieldErrors] = useState<CarFieldErrors>({});
     const [serverErrors, setServerErrors] = useState<Partial<Record<keyof CarFormValues, string>>>({});
-    const [saving, setSaving] = useState(false);
+    const save = useMutation({
+        mutationFn: (details: Parameters<typeof saveCar>[0]) => saveCar(details, car),
+    });
+    const saving = save.isPending;
     const [error, setError] = useState("");
     const maxYear = new Date().getFullYear() + 1;
 
@@ -59,15 +63,14 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
             return;
         }
 
-        setSaving(true);
         try {
-            const savedCar = await saveCar({
+            const savedCar = await save.mutateAsync({
                 make: values.make.trim(), model: values.model.trim(),
                 year: Number(values.year), horsepower: Number(values.horsepower),
                 price: values.price.trim() === "" ? null : Number(values.price),
                 color: values.color.trim() || null,
                 isAvailable: values.isAvailable === "true",
-            }, car);
+            });
             onSaved(savedCar);
         } catch (err) {
             if (err instanceof CarValidationError) {
@@ -83,8 +86,6 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
             } else {
                 setError(err instanceof Error ? err.message : "Could not save car.");
             }
-        } finally {
-            setSaving(false);
         }
     }
 

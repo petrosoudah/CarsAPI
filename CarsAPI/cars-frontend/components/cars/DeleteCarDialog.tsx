@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import useTranslatedError from "@/hooks/useTranslatedError";
 import { deleteCar, type Car } from "@/lib/api/cars-api";
@@ -19,20 +20,19 @@ export default function DeleteCarDialog({ car, onClose, onDeleted }: DeleteCarDi
     const t = useTranslations("Delete");
     const common = useTranslations("Common");
     const translateError = useTranslatedError();
-    const [deleting, setDeleting] = useState(false);
+    const mutation = useMutation({ mutationFn: deleteCar });
+    const deleting = mutation.isPending;
     const [error, setError] = useState("");
 
     async function handleDelete() {
         if (deleting) return;
-        setDeleting(true);
         setError("");
         try {
-            await deleteCar(car.id);
+            await mutation.mutateAsync(car.id);
             onDeleted(car.id);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Could not delete car.");
         } finally {
-            setDeleting(false);
         }
     }
 

@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { addPart, getCarsForPartForm, PartValidationError, updatePart, type Part } from "@/lib/api/parts-api";
 import { validatePart, type PartField, type PartFieldErrors, type PartFormValues } from "@/lib/validation/part-validation";
-import type { Car } from "@/lib/api/cars-api";
+import { queryKeys } from "@/lib/api/query-keys";
 import useTranslatedError from "@/hooks/useTranslatedError";
 
 type PartFormProps = {
@@ -25,32 +26,23 @@ export default function PartForm({ part = null, onSaved, onSavingChange }: PartF
         price: part?.price?.toString() ?? "",
         carId: part?.carId?.toString() ?? "",
     });
-    const [cars, setCars] = useState<Car[]>([]);
-    const [carsLoading, setCarsLoading] = useState(true);
-    const [carsError, setCarsError] = useState("");
-    const [carsAttempt, setCarsAttempt] = useState(0);
-    const [saving, setSaving] = useState(false);
+    const carsQuery = useQuery({
+        queryKey: queryKeys.carOptions,
+        queryFn: ({ signal }) => getCarsForPartForm(signal),
+    });
+    const cars = carsQuery.data ?? [];
+    const carsLoading = carsQuery.isFetching;
+    const carsError = carsQuery.error instanceof Error ? carsQuery.error.message : "";
+    const save = useMutation({
+        mutationFn: async (details: { manufacturer: string; description: string; price: number; carId: number | null }) => {
+            if (part) await updatePart(part.id, details);
+            else await addPart(details);
+        },
+    });
+    const saving = save.isPending;
     const [error, setError] = useState("");
     const [fieldErrors, setFieldErrors] = useState<PartFieldErrors>({});
     const [serverErrors, setServerErrors] = useState<Partial<Record<PartField, string>>>({});
-
-    useEffect(() => {
-        const controller = new AbortController();
-        async function loadCars() {
-            try {
-                const data = await getCarsForPartForm(controller.signal);
-                if (!controller.signal.aborted) setCars(data);
-            } catch (err) {
-                if (!controller.signal.aborted) {
-                    setCarsError(err instanceof Error ? err.message : "Could not load cars.");
-                }
-            } finally {
-                if (!controller.signal.aborted) setCarsLoading(false);
-            }
-        }
-        loadCars();
-        return () => controller.abort();
-    }, [carsAttempt]);
 
     function changeField(name: PartField, value: string) {
         setValues(previous => ({ ...previous, [name]: value }));
@@ -84,7 +76,6 @@ export default function PartForm({ part = null, onSaved, onSavingChange }: PartF
             return;
         }
 
-        setSaving(true);
         onSavingChange?.(true);
         try {
             const details = {
@@ -93,8 +84,7 @@ export default function PartForm({ part = null, onSaved, onSavingChange }: PartF
                 price: Number(values.price),
                 carId: values.carId === "" ? null : Number(values.carId),
             };
-            if (part) await updatePart(part.id, details);
-            else await addPart(details);
+            await save.mutateAsync(details);
 
             setValues({ manufacturer: "", description: "", price: "", carId: "" });
             onSaved();
@@ -113,7 +103,6 @@ export default function PartForm({ part = null, onSaved, onSavingChange }: PartF
                 setError(err instanceof Error ? err.message : part ? "Could not update part." : "Could not add part.");
             }
         } finally {
-            setSaving(false);
             onSavingChange?.(false);
         }
     }
@@ -135,9 +124,7 @@ export default function PartForm({ part = null, onSaved, onSavingChange }: PartF
                     <div className="space-y-2">
                         <p role="alert" className="text-destructive">{translateError(carsError)}</p>
                         <Button type="button" variant="outline" onClick={() => {
-                            setCarsError("");
-                            setCarsLoading(true);
-                            setCarsAttempt(previous => previous + 1);
+                            void carsQuery.refetch();
                         }}>{t("retryCars")}</Button>
                     </div>
                 )}

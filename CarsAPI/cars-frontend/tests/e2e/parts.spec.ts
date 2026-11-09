@@ -126,7 +126,7 @@ test("parts pagination handles boundaries and includes records after the first 5
     await expect(page.getByText("Showing 5 of 53 parts", { exact: true })).toBeVisible();
     await nav.getByRole("button", { name: "Previous" }).click();
     await expect(page.getByRole("heading", { name: "Maker37", exact: true })).toBeVisible();
-    expect(api.pages).toEqual([1, 2, 3, 4, 5, 4]);
+    expect(api.pages).toEqual([1, 2, 3, 4, 5]);
 });
 
 test("adding assigned and unassigned parts uses POST without changing cars", async ({ page }) => {

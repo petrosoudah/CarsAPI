@@ -1,145 +1,94 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CARS_PAGE_SIZE, getCars, updateCarAvailability, type Car } from "@/lib/api/cars-api";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CARS_PAGE_SIZE, getCars, type Car } from "@/lib/api/cars-api";
+import { queryKeys } from "@/lib/api/query-keys";
 
-export type CarsQuery = {
+type CarsQuery = {
     search: string;
     availability: string;
     pageNumber: number;
-    revision: number;
 };
 
-type CarsResult = {
-    items: Car[];
-    totalCount: number;
-    loading: boolean;
-    error: string;
-};
-
-const initialQuery: CarsQuery = {
-    search: "", availability: "all", pageNumber: 1, revision: 0,
-};
+const initialQuery: CarsQuery = { search: "", availability: "all", pageNumber: 1 };
 
 export default function useCars() {
+    const client = useQueryClient();
     const [query, setQuery] = useState(initialQuery);
-    const [result, setResult] = useState<CarsResult>({
-        items: [], totalCount: 0, loading: true, error: "",
-    });
-    const activeRequest = useRef<AbortController | null>(null);
     const latestQuery = useRef(query);
-
-    // Event callbacks need the current filter even if their card has unmounted.
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const { search, availability, pageNumber } = query;
     useEffect(() => {
         latestQuery.current = query;
     }, [query]);
 
-    const requestList = useCallback((change: (previous: CarsQuery) => CarsQuery) => {
-        // Stop the old request immediately, before the next Effect cleanup.
-        activeRequest.current?.abort();
-        setResult(previous => ({ ...previous, loading: true, error: "" }));
-        setQuery(previous => ({
-            ...change(previous),
-            revision: previous.revision + 1,
-        }));
-    }, []);
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(search), 250);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const listKey = queryKeys.carList(debouncedSearch, availability, pageNumber);
+    const list = useQuery({
+        queryKey: listKey,
+        queryFn: ({ signal }) => getCars({ signal, pageNumber, search: debouncedSearch, availability }),
+        placeholderData: keepPreviousData,
+    });
+    const changingSearch = search !== debouncedSearch;
+    const loading = changingSearch || list.isFetching;
+    const cars = list.data?.items ?? [];
+    const totalCount = list.data?.totalCount ?? 0;
+    const totalPages = Math.max(1, Math.ceil(totalCount / CARS_PAGE_SIZE));
+
+    if (!loading && !list.isError && pageNumber > totalPages) {
+        setQuery(previous => ({ ...previous, pageNumber: totalPages }));
+    }
 
     const refresh = useCallback((firstPage = false) => {
-        requestList(previous => ({
-            ...previous,
-            pageNumber: firstPage ? 1 : previous.pageNumber,
-        }));
-    }, [requestList]);
+        if (firstPage) setQuery(previous => ({ ...previous, pageNumber: 1 }));
+        void client.invalidateQueries({ queryKey: queryKeys.cars });
+    }, [client]);
 
-    const changeSearch = useCallback((search: string) => {
-        requestList(previous => ({ ...previous, search, pageNumber: 1 }));
-    }, [requestList]);
+    const changeSearch = useCallback((value: string) => {
+        setQuery(previous => ({ ...previous, search: value, pageNumber: 1 }));
+    }, []);
 
-    const changeAvailability = useCallback((availability: string) => {
-        requestList(previous => ({ ...previous, availability, pageNumber: 1 }));
-    }, [requestList]);
+    const changeAvailability = useCallback((value: string) => {
+        setQuery(previous => ({ ...previous, availability: value, pageNumber: 1 }));
+    }, []);
 
-    const changePage = useCallback((pageNumber: number) => {
-        requestList(previous => ({ ...previous, pageNumber }));
-    }, [requestList]);
+    const changePage = useCallback((value: number) => {
+        setQuery(previous => ({ ...previous, pageNumber: value }));
+    }, []);
 
     const clearFilters = useCallback(() => {
-        requestList(previous => ({ ...previous, search: "", availability: "all", pageNumber: 1 }));
-    }, [requestList]);
-
-    const { search, availability, pageNumber, revision } = query;
-
-    useEffect(() => {
-        const controller = new AbortController();
-        activeRequest.current = controller;
-
-        async function loadCars() {
-            try {
-                const data = await getCars({
-                    signal: controller.signal, pageNumber, search, availability,
-                });
-                if (controller.signal.aborted) return;
-
-                const lastPage = Math.max(1, Math.ceil(data.totalCount / CARS_PAGE_SIZE));
-                if (pageNumber > lastPage) {
-                    requestList(previous => ({ ...previous, pageNumber: lastPage }));
-                    return;
-                }
-
-                setResult({
-                    items: data.items, totalCount: data.totalCount,
-                    loading: false, error: "",
-                });
-            } catch (err) {
-                if (!controller.signal.aborted) {
-                    setResult(previous => ({
-                        ...previous, loading: false,
-                        error: err instanceof Error ? err.message : "Could not load cars.",
-                    }));
-                }
-            } finally {
-                if (activeRequest.current === controller) activeRequest.current = null;
-            }
-        }
-
-        const timer = setTimeout(loadCars, 250);
-        return () => {
-            clearTimeout(timer);
-            controller.abort();
-            if (activeRequest.current === controller) activeRequest.current = null;
-        };
-    }, [search, availability, pageNumber, revision, requestList]);
+        setQuery({ search: "", availability: "all", pageNumber: 1 });
+    }, []);
 
     const applyCarUpdate = useCallback((updatedCar: Car) => {
-        // A filtered list may need a replacement row and a new total count.
-        // Refresh an in-flight list too, so an older GET cannot undo this update.
-        if (latestQuery.current.availability !== "all" || activeRequest.current) {
+        const current = latestQuery.current;
+        const currentKey = queryKeys.carList(
+            current.search, current.availability, current.pageNumber
+        );
+        if (current.availability !== "all" || current.search !== debouncedSearch ||
+            client.isFetching({ queryKey: queryKeys.cars }) > 0) {
             refresh();
             return;
         }
-        setResult(previous => ({
-            ...previous,
-            items: previous.items.map(car => car.id === updatedCar.id ? updatedCar : car),
-        }));
-    }, [refresh]);
-
-    const toggleAvailability = useCallback(async (car: Car) => {
-        try {
-            const updatedCar = await updateCarAvailability(car);
-            applyCarUpdate(updatedCar);
-        } catch (err) {
-            // Error is handled by useCarActions, but we could surface it here if needed
-            console.error("Failed to toggle availability:", err);
-            throw err;
-        }
-    }, [applyCarUpdate]);
+        client.setQueryData<{ items: Car[]; totalCount: number }>(
+            currentKey, previous =>
+            previous
+                ? { ...previous, items: previous.items.map(car =>
+                    car.id === updatedCar.id ? updatedCar : car) }
+                : previous
+        );
+        client.setQueryData(queryKeys.car(String(updatedCar.id)), updatedCar);
+    }, [client, debouncedSearch, refresh]);
 
     return {
-        cars: result.items, totalCount: result.totalCount,
-        loading: result.loading, error: result.error, query,
-        totalPages: Math.max(1, Math.ceil(result.totalCount / CARS_PAGE_SIZE)),
-        hasFilters: search !== "" || availability !== "all",
-        refresh, changeSearch, changeAvailability, changePage,
-        clearFilters, applyCarUpdate, toggleAvailability,
+        cars, totalCount, loading,
+        error: list.error instanceof Error ? list.error.message : "",
+        query, totalPages, hasFilters: search !== "" || availability !== "all",
+        refresh, changeSearch, changeAvailability, changePage, clearFilters, applyCarUpdate,
     };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { updateCarAvailability, type Car } from "@/lib/api/cars-api";
 
 export default function useCarActions(
@@ -9,39 +10,34 @@ export default function useCarActions(
 ) {
     const inFlight = useRef(false);
     const [state, setState] = useState({
-        pending: false,
         error: "",
     });
+    const mutation = useMutation({ mutationFn: updateCarAvailability });
 
     async function toggleAvailability() {
         // A ref changes immediately, so even two calls before a render cannot duplicate a write.
         if (inFlight.current) return;
         inFlight.current = true;
 
-        setState({ pending: true, error: "" });
+        setState({ error: "" });
 
         try {
-            const updatedCar = await updateCarAvailability(car);
+            const updatedCar = await mutation.mutateAsync(car);
 
             onUpdated(updatedCar);
         } catch (err) {
-            setState(previous => ({
-                ...previous,
+            setState({
                 error: err instanceof Error
                     ? err.message
                     : "Could not update availability.",
-            }));
+            });
         } finally {
             inFlight.current = false;
-            setState(previous => ({
-                ...previous,
-                pending: false,
-            }));
         }
     }
 
     return {
-        pending: state.pending,
+        pending: mutation.isPending,
         error: state.error,
         toggleAvailability,
     };

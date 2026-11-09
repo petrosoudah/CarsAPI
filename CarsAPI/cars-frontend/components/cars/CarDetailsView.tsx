@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getCar, type Car } from "@/lib/api/cars-api";
+import { useQuery } from "@tanstack/react-query";
+import { getCar } from "@/lib/api/cars-api";
+import { queryKeys } from "@/lib/api/query-keys";
 import { Badge } from "@/components/ui/badge";
 import { useFormatter, useTranslations } from "next-intl";
 import useTranslatedError from "@/hooks/useTranslatedError";
@@ -15,36 +16,11 @@ export default function CarDetailsView({ id }: CarDetailsViewProps) {
     const common = useTranslations("Common");
     const format = useFormatter();
     const translateError = useTranslatedError();
-    const [car, setCar] = useState<Car | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-
-    useEffect(() => {
-        const controller = new AbortController();
-
-        async function loadCar() {
-            try {
-                const data = await getCar(id, controller.signal);
-
-                if (!controller.signal.aborted) {
-                    setCar(data);
-                }
-            } catch (err) {
-                if (!controller.signal.aborted) {
-                    setError(
-                        err instanceof Error ? err.message : "Could not load car."
-                    );
-                }
-            } finally {
-                if (!controller.signal.aborted) {
-                    setLoading(false);
-                }
-            }
-        }
-
-        loadCar();
-        return () => controller.abort();
-    }, [id]);
+    const { data: car, isPending: loading, error: queryError } = useQuery({
+        queryKey: queryKeys.car(id),
+        queryFn: ({ signal }) => getCar(id, signal),
+    });
+    const error = queryError instanceof Error ? queryError.message : "";
 
     if (loading) return <p role="status">{t("loading")}</p>;
 
