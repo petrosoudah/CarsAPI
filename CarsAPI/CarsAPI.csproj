@@ -62,36 +62,14 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="cars-frontend\app\about\page.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\AvailabilityMessage.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\CarAvailability.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\CarBanner.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\CarFetchDemo.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\CarFilter.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\CarForm.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\CarPhoto.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\CarSearch.tsx" />
     <TypeScriptCompile Include="cars-frontend\app\cars\[id]\loading.tsx" />
     <TypeScriptCompile Include="cars-frontend\app\cars\[id]\page.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\ConnectionStatus.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\file - Copy.tsx">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="cars-frontend\app\file.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\HorsepowerTracker.tsx" />
     <TypeScriptCompile Include="cars-frontend\app\LanguageProvider.tsx" />
     <TypeScriptCompile Include="cars-frontend\app\parts\page.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\useCounter.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\useOnlineStatus.ts" />
-    <TypeScriptCompile Include="cars-frontend\app\UsernameContext.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\UsernameEditor.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\UserProfile.tsx" />
     <TypeScriptCompile Include="cars-frontend\components\cars\CarDetailsView.tsx" />
-    <TypeScriptCompile Include="cars-frontend\app\ThemeProvider.tsx" />
     <TypeScriptCompile Include="cars-frontend\components\cars\LanguageSwitcher.tsx" />
-    <TypeScriptCompile Include="cars-frontend\components\cars\ThemeToggle.tsx" />
     <TypeScriptCompile Include="cars-frontend\components\parts\PartForm.tsx" />
     <TypeScriptCompile Include="cars-frontend\hooks\useCarActions.ts" />
-    <TypeScriptCompile Include="cars-frontend\lib\parts-api.ts" />
   </ItemGroup>
 
 </Project>
