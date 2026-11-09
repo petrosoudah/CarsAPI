@@ -18,9 +18,9 @@ public class UpdateCarHandler(AppDbContext context) : IRequestHandler<UpdateCar,
         car.UpdateDetails(
             request.Make,
             request.Model,
-            request.Year,
-            request.Horsepower,
-            request.Price,
+            Year.Create(request.Year),
+            Horsepower.Create(request.Horsepower),
+            request.Price is decimal amount ? Price.Create(amount) : null,
             request.Color);
 
         // Handle availability separately

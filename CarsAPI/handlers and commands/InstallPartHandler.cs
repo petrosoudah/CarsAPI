@@ -24,7 +24,7 @@ public class InstallPartHandler(AppDbContext context)
         {
             Manufacturer = request.Manufacturer,
             Description = request.Description,
-            Price = request.Price.Amount,
+            Price = Price.Create(request.Price),
             CarId = request.CarId
         };
 

@@ -8,7 +8,7 @@ namespace CarsAPI.handlers_and_commands
         public Guid Id { get; init; }
         public string Manufacturer { get; init; } = string.Empty;
         public string Description { get; init; } = string.Empty;
-        public Price Price { get; init; }
+        public decimal Price { get; init; }
 
         public int? CarId { get; init; }
     }

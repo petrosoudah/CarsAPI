@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { Car } from "../../lib/api/cars-api";
+import { carResponse } from "./car-response";
 
 function seedCars(count = 60): Car[] {
     return Array.from({ length: count }, (_, index) => ({
@@ -30,7 +31,7 @@ async function mockApi(page: Page, initial = seedCars()) {
             if (state.failGet) { state.failGet = false; return send(500, {}); }
             if (Number.isFinite(id) && id > 0) {
                 const car = cars.find(item => item.id === id);
-                return send(car ? 200 : 404, car);
+                return car ? send(200, carResponse(car)) : send(404);
             }
             state.listReads++;
             const search = (url.searchParams.get("search") || "").toLowerCase();
@@ -39,7 +40,8 @@ async function mockApi(page: Page, initial = seedCars()) {
                 && (available === null || car.isAvailable === (available === "true")));
             const pageNumber = Number(url.searchParams.get("pageNumber") || 1);
             const size = Number(url.searchParams.get("pageSize") || 50);
-            return send(200, filtered.slice((pageNumber - 1) * size, pageNumber * size), { "X-Total-Count": String(filtered.length) });
+            const items = filtered.slice((pageNumber - 1) * size, pageNumber * size).map(carResponse);
+            return send(200, items, { "X-Total-Count": String(filtered.length) });
         }
         if (request.method() === "DELETE") {
             cars = cars.filter(car => car.id !== id);
@@ -53,10 +55,13 @@ async function mockApi(page: Page, initial = seedCars()) {
             return send(400, { errors: { Make: ["Make rejected by the server."] } });
         }
         const body = request.postDataJSON() as Car;
+        if (request.method() === "PUT" && body.id !== id) {
+            return send(400, "IDs do not match.");
+        }
         const saved = { ...body, id: request.method() === "POST" ? Math.max(0, ...cars.map(car => car.id)) + 1 : id };
         state.writes.push(saved);
         cars = request.method() === "POST" ? [...cars, saved] : cars.map(car => car.id === id ? saved : car);
-        return send(request.method() === "POST" ? 201 : 200, saved);
+        return send(request.method() === "POST" ? 201 : 200, carResponse(saved));
     });
     return state;
 }

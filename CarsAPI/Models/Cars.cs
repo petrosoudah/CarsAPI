@@ -15,8 +15,11 @@ public class Cars : Entity
 
     public string Make { get; private set; } = string.Empty;
     public string Model { get; private set; } = string.Empty;
+    [NotMapped]
     public Year Year { get; private set; }
+    [NotMapped]
     public Horsepower Horsepower { get; private set; }
+    [NotMapped]
     public Price? Price { get; private set; }
     public bool IsAvailable { get; private set; } = true;
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
@@ -25,18 +28,29 @@ public class Cars : Entity
     [JsonIgnore]
     public ICollection<Parts> Parts { get; private set; } = new List<Parts>();
 
-    // OData-compatible computed properties (expose VO values for $select, $filter, $orderby)
-    [NotMapped]
+    // EF and OData use primitive properties backed by the domain values.
     [JsonIgnore]
-    public int YearValue => Year.Value;
+    public int YearValue
+    {
+        get => Year.Value;
+        private set => Year = Year.Create(value);
+    }
 
-    [NotMapped]
     [JsonIgnore]
-    public int HorsepowerValue => Horsepower.Value;
+    public int HorsepowerValue
+    {
+        get => Horsepower.Value;
+        private set => Horsepower = Horsepower.Create(value);
+    }
 
-    [NotMapped]
     [JsonIgnore]
-    public decimal PriceAmount => Price?.Amount ?? 0m;
+    public decimal? PriceAmount
+    {
+        get => Price?.Amount;
+        private set => Price = value is decimal amount
+            ? CarsAPI.Domain.ValueObjects.Price.Create(amount)
+            : null;
+    }
 
     // EF Core requires parameterless constructor
     private Cars() { }

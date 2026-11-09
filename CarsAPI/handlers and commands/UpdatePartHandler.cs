@@ -16,7 +16,7 @@ public class UpdatePartHandler(AppDbContext context) : IRequestHandler<UpdatePar
         }
         part.Manufacturer = request.Manufacturer;
         part.Description = request.Description;
-        part.Price = request.Price.Amount;
+        part.Price = Price.Create(request.Price);
         part.CarId = request.CarId;
         await context.SaveChangesAsync(cancellationToken);
         return part;

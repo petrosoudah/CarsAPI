@@ -7,6 +7,6 @@ namespace CarsAPI.handlers_and_commands
         int CarId,
         string Manufacturer,
         string Description,
-        Price Price
+        decimal Price
     ) : IRequest<Guid?>;
 }

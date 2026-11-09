@@ -7,9 +7,9 @@ public record UpdateCar(
     int Id,
     string Make,
     string Model,
-    Year Year,
-    Horsepower Horsepower,
-    Price? Price,
+    int Year,
+    int Horsepower,
+    decimal? Price,
     bool IsAvailable = true,
     string? Color = null
 ) : IRequest<CarsAPI.Models.Cars>;

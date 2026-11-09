@@ -18,7 +18,7 @@ namespace CarsAPI.handlers_and_commands
                     Id = p.Id,
                     Manufacturer = p.Manufacturer,
                     Description = p.Description,
-                    Price = p.Price,
+                    Price = p.PriceAmount,
                     CarId = p.CarId,
                     CarName = p.Car == null
                         ? null

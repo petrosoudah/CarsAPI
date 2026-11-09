@@ -116,8 +116,7 @@ export async function saveCar(details: CarDetails, car: Car | null): Promise<Car
     const body = car
         ? {
             id: car.id,
-            ...details,
-            isAvailable: car.isAvailable
+            ...details
         }
         : {
             ...details,
@@ -179,6 +178,7 @@ export async function updateCarAvailability(car: Car): Promise<Car> {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
+            id: car.id,
             ...toCarDetails(car),
             isAvailable: !car.isAvailable
         })

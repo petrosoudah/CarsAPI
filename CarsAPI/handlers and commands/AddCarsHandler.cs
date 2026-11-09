@@ -11,9 +11,9 @@ namespace CarsAPI.handlers_and_commands
             var car = CarsAPI.Models.Cars.Create(
                 request.Make,
                 request.Model,
-                request.Year,
-                request.Horsepower,
-                request.Price,
+                Year.Create(request.Year),
+                Horsepower.Create(request.Horsepower),
+                request.Price is decimal amount ? Price.Create(amount) : null,
                 request.Color);
 
             // IsAvailable is handled by the factory (always true on creation)

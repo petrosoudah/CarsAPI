@@ -18,7 +18,7 @@ public class UpdateCarPriceHandler(AppDbContext context)
             return 0;
         }
 
-        car.ChangePrice(request.NewPrice);
+        car.ChangePrice(Price.Create(request.NewPrice));
 
         return await context.SaveChangesAsync(cancellationToken);
     }

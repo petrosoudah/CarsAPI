@@ -12,12 +12,15 @@ namespace CarsAPI.Models
 
         public string Manufacturer { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        [NotMapped]
         public Price Price { get; set; }
 
-        // OData-compatible decimal price (exposes Price.Amount for OData $select, $filter)
         [JsonIgnore]
-        [NotMapped]
-        public decimal PriceAmount => Price.Amount;
+        public decimal PriceAmount
+        {
+            get => Price.Amount;
+            private set => Price = Price.Create(value);
+        }
 
         public int? CarId { get; set; }
 

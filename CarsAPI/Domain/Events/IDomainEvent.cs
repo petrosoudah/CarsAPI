@@ -1,6 +1,6 @@
 namespace CarsAPI.Domain.Events;
 
-public interface IDomainEvent
+public interface IDomainEvent : MediatR.INotification
 {
     DateTime OccurredAt { get; }
 }

@@ -101,6 +101,13 @@ app.UseExceptionHandler(errorApp =>
             return;
         }
 
+        if (exception is BadHttpRequestException badRequest)
+        {
+            await Results.Problem(statusCode: badRequest.StatusCode)
+                .ExecuteAsync(context);
+            return;
+        }
+
         logger.LogError(
             exception,
             "Unhandled exception while processing {Method} {Path}",
@@ -349,11 +356,7 @@ static IEdmModel GetEdmModel()
 {
     var builder = new ODataConventionModelBuilder();
 
-    // Value Objects (Price, Year, Horsepower) are readonly record structs - OData 9.x
-    // doesn't support them as Complex Types. They map to primitive DB types (decimal, int).
-    // We must Ignore them in the EDM model since they're not primitive CLR types.
-    // The underlying DB columns work for filtering/ordering via EF Core ValueConverters.
-    // OData exposes read-only computed properties (PriceAmount, YearValue, HorsepowerValue).
+    // Expose the mapped primitive properties so OData queries can translate to SQL.
 
     var carsEntity = builder.EntitySet<Cars>("Cars").EntityType;
     carsEntity.HasKey(c => c.Id);
@@ -365,9 +368,9 @@ static IEdmModel GetEdmModel()
     carsEntity.Property(c => c.IsAvailable);
     carsEntity.Property(c => c.CreatedAt);
     carsEntity.Property(c => c.Color);
-    carsEntity.Property(c => c.YearValue);       // Computed: Year.Value
-    carsEntity.Property(c => c.HorsepowerValue); // Computed: Horsepower.Value
-    carsEntity.Property(c => c.PriceAmount);     // Computed: Price.Amount
+    carsEntity.Property(c => c.YearValue);
+    carsEntity.Property(c => c.HorsepowerValue);
+    carsEntity.Property(c => c.PriceAmount);
     carsEntity.HasMany(c => c.Parts);
 
     var partsEntity = builder.EntitySet<Parts>("Parts").EntityType;
@@ -375,7 +378,7 @@ static IEdmModel GetEdmModel()
     partsEntity.Property(p => p.Manufacturer);
     partsEntity.Property(p => p.Description);
     partsEntity.Ignore(p => p.Price); // VO: use PriceAmount
-    partsEntity.Property(p => p.PriceAmount);    // Computed: Price.Amount
+    partsEntity.Property(p => p.PriceAmount);
     partsEntity.Property(p => p.CarId);
     partsEntity.HasOptional(p => p.Car);
 

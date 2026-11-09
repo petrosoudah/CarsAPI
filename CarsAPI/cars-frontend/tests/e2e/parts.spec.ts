@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { carResponse } from "./car-response";
 import type { Part, PartDetails } from "../../lib/api/parts-api";
 
 type SavedPart = PartDetails & { id?: string };
@@ -50,7 +51,7 @@ async function mockParts(page: Page, initial = seedParts()) {
             const number = Number(url.searchParams.get("pageNumber") || 1);
             const size = Number(url.searchParams.get("pageSize") || 50);
             state.carPages.push(number);
-            return send(200, carOptions.slice((number - 1) * size, number * size), {
+            return send(200, carOptions.slice((number - 1) * size, number * size).map(carResponse), {
                 "X-Total-Count": String(carOptions.length),
             });
         }

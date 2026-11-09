@@ -14,7 +14,7 @@ public class AddPartsHandler(AppDbContext context) : IRequestHandler<AddParts, C
             Id = request.Id,
             Manufacturer = request.Manufacturer,
             Description = request.Description,
-            Price = request.Price.Amount,
+            Price = Price.Create(request.Price),
             CarId = request.CarId
         };
         context.Parts.Add(part);

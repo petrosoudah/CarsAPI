@@ -1,7 +1,6 @@
 ﻿using CarsAPI.Models;
 using CarsAPI.Domain.Common;
 using CarsAPI.Domain.Events;
-using CarsAPI.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarsAPI.Data
@@ -48,17 +47,17 @@ namespace CarsAPI.Data
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<Cars>()
-                .Property(c => c.Price)
-                .HasConversion(new PriceConverter())
+                .Property(c => c.PriceAmount)
+                .HasColumnName("Price")
                 .HasPrecision(18, 2);
 
             modelBuilder.Entity<Cars>()
-                .Property(c => c.Year)
-                .HasConversion(new YearConverter());
+                .Property(c => c.YearValue)
+                .HasColumnName("Year");
 
             modelBuilder.Entity<Cars>()
-                .Property(c => c.Horsepower)
-                .HasConversion(new HorsepowerConverter());
+                .Property(c => c.HorsepowerValue)
+                .HasColumnName("Horsepower");
 
             modelBuilder.Entity<CarPartsView>(entity =>
             {
@@ -69,8 +68,8 @@ namespace CarsAPI.Data
                 .Property(p => p.Id)
                 .HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<Parts>()
-                .Property(p => p.Price)
-                .HasConversion(new NonNullablePriceConverter())
+                .Property(p => p.PriceAmount)
+                .HasColumnName("Price")
                 .HasPrecision(18, 2);
 
             modelBuilder.Entity<CarPartsView>()
