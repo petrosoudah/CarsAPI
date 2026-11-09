@@ -41,6 +41,7 @@ Assigning a part does **not** change the car's price. A car with assigned parts 
 | shadcn/ui with Base UI | MediatR |
 | next-intl and next-themes | FluentValidation |
 | Playwright | System.Text.Json |
+| | OData 9.x |
 
 ## Project Structure
 
@@ -50,6 +51,8 @@ Paths below are relative to this repository's root.
 CarsAPI.slnx
 CarsAPI/
 ├── Program.cs
+├── Controllers/           # OData controllers
+├── Domain/                # DDD: Value Objects, Domain Events, Entity base
 ├── Data/
 ├── Models/
 ├── handlers and commands/
@@ -138,6 +141,8 @@ Use `npm.cmd` and `npx.cmd` if PowerShell blocks the corresponding script launch
 
 ## Main API Endpoints
 
+### REST (CQRS via MediatR)
+
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
 | GET | `/cars` | Search, availability filtering, pagination |
@@ -153,6 +158,19 @@ Use `npm.cmd` and `npx.cmd` if PowerShell blocks the corresponding script launch
 
 Paginated responses include `X-Total-Count`. Car IDs are integers; part IDs are GUIDs.
 
+### OData
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/odata/Cars` | Queryable cars with `$filter`, `$select`, `$orderby`, `$expand`, `$count`, `$top`, `$skip` |
+| GET | `/odata/Parts` | Queryable parts with full OData query options |
+| GET | `/odata/CarPartsView` | Queryable car-parts view |
+
+Examples:
+- `/odata/Cars?$filter=IsAvailable eq true&$orderby=Year desc&$top=5`
+- `/odata/Cars?$select=Make,Model,Price&$count=true`
+- `/odata/Cars?$expand=Parts($select=Manufacturer,Description)`
+
 ## Backend Learning Topics
 
 - **Exception handling:** centralized validation responses, relationship conflicts (409), and logged unexpected failures with generic Problem Details.
@@ -167,6 +185,49 @@ POST /learning/transaction-scope?simulateFailure=true
 The first commits practice records. The second intentionally fails before `Complete()` so the transaction rolls back. This exercise writes to the configured database and is available only in Development.
 
 A dependency-injection `CreateScope()` manages service lifetimes; it does not provide a database transaction.
+
+## OData
+
+The project implements OData 9.x with full query capabilities:
+
+- **`$filter`** — server-side filtering (e.g., `Year gt 2020`, `contains(Model,'Civic')`)
+- **`$select`** — projection to reduce payload (e.g., `Make,Model,Price`)
+- **`$orderby`** — server-side sorting (e.g., `Year desc,Price asc`)
+- **`$expand`** — include navigation properties (e.g., `Parts($select=Manufacturer)`)
+- **`$count`** — total count in `@odata.count`
+- **`$top` / `$skip`** — paging (max top 100, default page size 50)
+
+Configured in `Program.cs` with `AddOData` and an EDM model exposing `Cars`, `Parts`, and `CarPartsView`. Controllers in `Controllers/CarsODataController.cs` and `PartsODataController.cs` use `[EnableQuery]`.
+
+## Domain-Driven Design (DDD)
+
+The project demonstrates core DDD patterns implemented incrementally:
+
+### Value Objects (`Domain/ValueObjects/`)
+- **`Price`** — immutable `readonly record struct` with currency, arithmetic (`Add`, `Subtract`), comparison operators, and implicit `decimal` conversion for JSON serialization compatibility
+- **`Year`** — range-validated (1886 to current year + 1)
+- **`Horsepower`** — positive-only validated
+- EF Core `ValueConverter` classes handle nullable/non-nullable persistence
+
+### Domain Events (`Domain/Events/`)
+- `CarCreated`, `CarUpdated`, `CarPriceChanged`, `CarSold`, `CarAvailable`, `PartInstalled`
+- All implement `IDomainEvent` with `OccurredAt` timestamp
+- Published via `DomainEventDispatcher` using MediatR `IPublisher`
+
+### Entity Base Class (`Domain/Common/Entity.cs`)
+- Tracks domain events in `_domainEvents` collection
+- `AddDomainEvent`, `ClearDomainEvents`, `DomainEvents` accessor
+
+### Rich Domain Model (`Models/Cars.cs`)
+- Inherits from `Entity`
+- Private setters (encapsulation), private parameterless constructor for EF Core
+- Factory method: `Cars.Create(...)` emits `CarCreated` event
+- Domain methods: `UpdateDetails`, `ChangePrice`, `MarkSold`, `MarkAvailable`, `InstallPart` — each emits appropriate domain event
+- Handlers delegate to entity methods instead of setting properties directly
+
+### Event Dispatching
+- `DomainEventDispatcher` registered as Scoped in DI
+- `AppDbContext.SaveChangesAsync` overridden to collect entities with events and dispatch after successful save
 
 ## Wider Backend Internship Learning
 
