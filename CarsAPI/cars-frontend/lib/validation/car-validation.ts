@@ -5,6 +5,7 @@ export type CarFormValues = {
     horsepower: string;
     price: string;
     color: string;
+    isAvailable: string;
 };
 
 export type ValidationKey = "required" | "max50" | "year" | "horsepower" | "price" | "color";

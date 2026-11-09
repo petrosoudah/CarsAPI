@@ -1,3 +1,4 @@
+using CarsAPI.Domain.ValueObjects;
 using CarsAPI.handlers_and_commands;
 using FluentValidation;
 
@@ -10,6 +11,6 @@ public sealed class UpdateCarPriceValidator : AbstractValidator<UpdateCarPrice>
         RuleFor(request => request.CarId)
             .GreaterThan(0).WithMessage("Car ID must be greater than 0.");
         RuleFor(request => request.NewPrice)
-            .GreaterThanOrEqualTo(0).WithMessage("Price must be greater than or equal to 0.");
+            .Must(p => p.Amount >= 0).WithMessage("Price must be greater than or equal to 0.");
     }
 }

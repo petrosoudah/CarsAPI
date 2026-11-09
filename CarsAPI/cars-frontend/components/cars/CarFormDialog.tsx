@@ -24,6 +24,7 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
         make: car?.make ?? "", model: car?.model ?? "",
         year: car ? String(car.year) : "", horsepower: car ? String(car.horsepower) : "",
         price: car?.price?.toString() ?? "", color: car?.color ?? "",
+        isAvailable: car?.isAvailable ? "true" : "false",
     });
     const initialValues = useRef(values);
     const [fieldErrors, setFieldErrors] = useState<CarFieldErrors>({});
@@ -65,6 +66,7 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
                 year: Number(values.year), horsepower: Number(values.horsepower),
                 price: values.price.trim() === "" ? null : Number(values.price),
                 color: values.color.trim() || null,
+                isAvailable: values.isAvailable === "true",
             }, car);
             onSaved(savedCar);
         } catch (err) {
@@ -87,7 +89,7 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
     }
 
     const fields: {
-        name: keyof CarFormValues; type: "text" | "number"; placeholder: string;
+        name: keyof CarFormValues; type: "text" | "number" | "checkbox"; placeholder: string;
         required?: boolean; maxLength?: number; min?: number; max?: number; step?: string;
     }[] = [
         { name: "make", type: "text", placeholder: t("makePlaceholder"), required: true, maxLength: 50 },
@@ -96,6 +98,7 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
         { name: "horsepower", type: "number", placeholder: "150", required: true, min: 1, max: 2147483647, step: "1" },
         { name: "price", type: "number", placeholder: "20000", min: 0, step: "0.01" },
         { name: "color", type: "text", placeholder: t("colorPlaceholder"), maxLength: 30 },
+        { name: "isAvailable", type: "checkbox", placeholder: "", required: false },
     ];
     function hasUnsavedChanges() {
         return Object.keys(values).some(key => {
@@ -131,7 +134,7 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} noValidate className="space-y-4">
-                    {fields.map(({ name, placeholder, ...attributes }) => {
+                    {fields.map(({ name, placeholder, type, ...attributes }) => {
                         const message = fieldErrors[name]
                             ? validation(fieldErrors[name], { maxYear })
                             : serverErrors[name];
@@ -139,19 +142,36 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
                         const errorId = message ? "car-" + name + "-error" : undefined;
                         return (
                             <div key={name} className="space-y-2">
-                                <label htmlFor={"car-" + name} className="text-sm font-medium">{t(name)}</label>
-                                <Input {...attributes} id={"car-" + name} name={name} placeholder={placeholder}
-                                    disabled={saving} value={values[name]}
-                                    onChange={event => updateField(name, event.target.value)}
-                                    aria-invalid={Boolean(message)}
-                                    aria-describedby={[hintId, errorId].filter(Boolean).join(" ") || undefined} />
-                                {name === "year" && (
-                                    <p id={hintId} className="text-sm text-muted-foreground">
-                                        {t("yearHint", { maxYear })}
-                                    </p>
+                                {type === "checkbox" ? (
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id={"car-" + name}
+                                            name={name}
+                                            checked={values[name] === "true"}
+                                            onChange={event => updateField(name, event.target.checked ? "true" : "false")}
+                                            disabled={saving}
+                                            aria-invalid={Boolean(message)}
+                                            aria-describedby={errorId}
+                                            className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-2 focus:ring-primary-500" />
+                                        <label htmlFor={"car-" + name} className="text-sm font-medium cursor-pointer">{t(name)}</label>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <label htmlFor={"car-" + name} className="text-sm font-medium">{t(name)}</label>
+                                        <Input {...attributes} id={"car-" + name} name={name} placeholder={placeholder}
+                                            disabled={saving} value={values[name]}
+                                            onChange={event => updateField(name, event.target.value)}
+                                            aria-invalid={Boolean(message)}
+                                            aria-describedby={[hintId, errorId].filter(Boolean).join(" ") || undefined} />
+                                        {name === "year" && (
+                                            <p id={hintId} className="text-sm text-muted-foreground">
+                                                {t("yearHint", { maxYear })}
+                                            </p>
+                                        )}
+                                        {message && <p id={"car-" + name + "-error"} className="text-sm text-destructive">{message}</p>}
+                                    </>
                                 )}
-                                {message && <p id={"car-" + name + "-error"} className="text-sm text-destructive">{message}</p>}
-                              
                             </div>
                         );
                     })}

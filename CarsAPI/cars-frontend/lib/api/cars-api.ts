@@ -9,7 +9,7 @@ export type Car = {
     isAvailable: boolean;
 };
 
-export type CarDetails = Pick<Car, "make" | "model" | "year" | "horsepower" | "price" | "color">;
+export type CarDetails = Pick<Car, "make" | "model" | "year" | "horsepower" | "price" | "color" | "isAvailable">;
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -81,7 +81,7 @@ export async function saveCar(details: CarDetails, car: Car | null): Promise<Car
         }
         : {
             ...details,
-            isAvailable: true
+            isAvailable: details.isAvailable ?? true
         };
 
     const response = await fetch(car ? CARS_URL + "/" + car.id : CARS_URL, {

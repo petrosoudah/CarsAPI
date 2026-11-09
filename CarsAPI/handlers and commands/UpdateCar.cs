@@ -1,16 +1,16 @@
-﻿using MediatR;
+﻿using CarsAPI.Domain.ValueObjects;
+using MediatR;
 
-namespace CarsAPI.handlers_and_commands;    
+namespace CarsAPI.handlers_and_commands;
 
-    public record UpdateCar : IRequest<CarsAPI.Models.Cars>
-{
-    public int Id { get; init; }
-    public string Make { get; init; } = string.Empty;
-    public string Model { get; init; }= string.Empty;
-    public int Year { get; init; }
-    public int Horsepower { get; init; }
-    public decimal? Price { get; init; }
-    public bool IsAvailable { get; init; } = true;
-    public string? Color { get; init; }
-}
+public record UpdateCar(
+    int Id,
+    string Make,
+    string Model,
+    Year Year,
+    Horsepower Horsepower,
+    Price? Price,
+    bool IsAvailable = true,
+    string? Color = null
+) : IRequest<CarsAPI.Models.Cars>;
 

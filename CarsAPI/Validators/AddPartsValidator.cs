@@ -1,4 +1,5 @@
 using CarsAPI.Data;
+using CarsAPI.Domain.ValueObjects;
 using CarsAPI.handlers_and_commands;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ public sealed class AddPartsValidator : AbstractValidator<AddParts>
             .NotEmpty().WithMessage("Description is required.")
             .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
         RuleFor(part => part.Price)
-            .GreaterThanOrEqualTo(0).WithMessage("Price must be greater than or equal to 0.");
+            .Must(p => p.Amount >= 0).WithMessage("Price must be greater than or equal to 0.");
         RuleFor(part => part.CarId)
             .Must(carId => !carId.HasValue || carId.Value > 0)
             .WithMessage("CarId must be greater than 0 when provided.")

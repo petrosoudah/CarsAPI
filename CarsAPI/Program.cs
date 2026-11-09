@@ -1,8 +1,12 @@
 using CarsAPI.Data;
 using CarsAPI.handlers_and_commands;
 using CarsAPI.Validators;
+using CarsAPI.Models;
 using MediatR;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 using Scalar.AspNetCore;
 using System.Reflection;
 using FluentValidation;
@@ -20,6 +24,20 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             "SqlServerConnection")));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CarsAPI.Behaviors.ValidationBehavior<,>));
+
+// Domain Event Dispatcher
+builder.Services.AddScoped<CarsAPI.Domain.Events.DomainEventDispatcher>();
+
+// OData configuration
+builder.Services.AddControllers()
+    .AddOData(opt => opt
+        .AddRouteComponents("odata", GetEdmModel())
+        .Select()
+        .Filter()
+        .OrderBy()
+        .Expand()
+        .Count()
+        .SetMaxTop(100));
 var frontendOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? (builder.Environment.IsDevelopment() ? ["http://localhost:3000"] : []);
 
@@ -92,6 +110,9 @@ app.UseExceptionHandler(errorApp =>
             .ExecuteAsync(context);
     });
 });
+
+// Map controllers for OData
+app.MapControllers();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -322,5 +343,14 @@ app.MapPost("/parts/install",
     });
 
 
+// OData EDM Model
+static IEdmModel GetEdmModel()
+{
+    var builder = new ODataConventionModelBuilder();
+    builder.EntitySet<Cars>("Cars");
+    builder.EntitySet<Parts>("Parts");
+    builder.EntitySet<CarPartsView>("CarPartsView");
+    return builder.GetEdmModel();
+}
 
 app.Run();

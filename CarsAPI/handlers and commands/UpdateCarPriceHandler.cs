@@ -1,8 +1,7 @@
 ﻿using CarsAPI.Data;
+using CarsAPI.Domain.ValueObjects;
 using MediatR;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
 
 namespace CarsAPI.handlers_and_commands;
 
@@ -13,27 +12,14 @@ public class UpdateCarPriceHandler(AppDbContext context)
         UpdateCarPrice request,
         CancellationToken cancellationToken)
     {
-        var rowsAffected = new SqlParameter(
-            "@RowsAffected", SqlDbType.Int)
+        var car = await context.Cars.FindAsync([request.CarId], cancellationToken);
+        if (car == null)
         {
-            Direction = ParameterDirection.Output
-        };
+            return 0;
+        }
 
-        await context.Database.ExecuteSqlRawAsync(
-            """
-            EXEC dbo.UpdateCarPrice
-                @CarId = @p0,
-                @NewPrice = @p1,
-                @RowsAffected = @RowsAffected OUTPUT
-            """,
-            new object[]
-            {
-                request.CarId,
-                request.NewPrice,
-                rowsAffected
-            },
-            cancellationToken);
+        car.ChangePrice(request.NewPrice);
 
-        return (int)rowsAffected.Value;
+        return await context.SaveChangesAsync(cancellationToken);
     }
 }

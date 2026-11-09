@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CarsAPI.Domain.ValueObjects;
 
 namespace CarsAPI.Models
 {
@@ -10,8 +11,8 @@ namespace CarsAPI.Models
 
         public string Manufacturer { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public decimal Price { get; set; }
-        
+        public Price Price { get; set; }
+
         public int? CarId { get; set; }
 
         public Cars? Car { get; set; }

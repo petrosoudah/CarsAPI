@@ -34,6 +34,7 @@
     "horsepower": "Horsepower",
     "price": "Price (optional)",
     "color": "Color (optional)",
+    "isAvailable": "Available",
     "makePlaceholder": "Enter car make",
     "modelPlaceholder": "Enter car model",
     "yearPlaceholder": "Enter car year",

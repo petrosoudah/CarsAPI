@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CARS_PAGE_SIZE, getCars, type Car } from "@/lib/api/cars-api";
+import { CARS_PAGE_SIZE, getCars, updateCarAvailability, type Car } from "@/lib/api/cars-api";
 
 export type CarsQuery = {
     search: string;
@@ -123,12 +123,23 @@ export default function useCars() {
         }));
     }, [refresh]);
 
+    const toggleAvailability = useCallback(async (car: Car) => {
+        try {
+            const updatedCar = await updateCarAvailability(car);
+            applyCarUpdate(updatedCar);
+        } catch (err) {
+            // Error is handled by useCarActions, but we could surface it here if needed
+            console.error("Failed to toggle availability:", err);
+            throw err;
+        }
+    }, [applyCarUpdate]);
+
     return {
         cars: result.items, totalCount: result.totalCount,
         loading: result.loading, error: result.error, query,
         totalPages: Math.max(1, Math.ceil(result.totalCount / CARS_PAGE_SIZE)),
         hasFilters: search !== "" || availability !== "all",
         refresh, changeSearch, changeAvailability, changePage,
-        clearFilters, applyCarUpdate,
+        clearFilters, applyCarUpdate, toggleAvailability,
     };
 }

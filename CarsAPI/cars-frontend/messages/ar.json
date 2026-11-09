@@ -34,6 +34,7 @@
     "horsepower": "القوة الحصانية",
     "price": "السعر (اختياري)",
     "color": "اللون (اختياري)",
+    "isAvailable": "متاحة",
     "makePlaceholder": "أدخل الشركة المصنعة",
     "modelPlaceholder": "أدخل طراز السيارة",
     "yearPlaceholder": "أدخل سنة الصنع",

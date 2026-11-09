@@ -1,5 +1,6 @@
 ﻿using CarsAPI.Data;
 using CarsAPI.Models;
+using CarsAPI.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using System.Transactions;
 
@@ -12,14 +13,12 @@ public static class TransactionScopeDemo
         bool simulateFailure,
         CancellationToken cancellationToken)
     {
-        var car = new Cars
-        {
-            Make = "ScopeDemo",
-            Model = simulateFailure ? "RollbackTest" : "CommitTest",
-            Year = DateTime.UtcNow.Year,
-            Horsepower = 100,
-            Price = 1000
-        };
+        var car = Cars.Create(
+            "ScopeDemo",
+            simulateFailure ? "RollbackTest" : "CommitTest",
+            Year.Create(DateTime.UtcNow.Year),
+            Horsepower.Create(100),
+            Price.Create(1000));
 
         try
         {

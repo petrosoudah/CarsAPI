@@ -49,7 +49,6 @@ export default function Home() {
         setNotice("saved");
     }
     function handleDeleted() {
-        // useCars corrects an out-of-range last page after fetching the new count.
         refresh();
         closeDialog();
         setNotice("deleted");

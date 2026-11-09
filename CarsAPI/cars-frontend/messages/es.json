@@ -34,6 +34,7 @@
     "horsepower": "Potencia",
     "price": "Precio (opcional)",
     "color": "Color (opcional)",
+    "isAvailable": "Disponible",
     "makePlaceholder": "Introduce la marca",
     "modelPlaceholder": "Introduce el modelo",
     "yearPlaceholder": "Introduce el año",
