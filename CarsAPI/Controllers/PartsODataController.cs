@@ -7,8 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CarsAPI.Controllers;
 
-[Route("odata/Parts")]
-public class PartsODataController(AppDbContext context) : ODataController
+public class PartsController(AppDbContext context) : ODataController
 {
     [EnableQuery(PageSize = 50, MaxTop = 100)]
     public IQueryable<Parts> Get()

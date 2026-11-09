@@ -25,6 +25,19 @@ public class Cars : Entity
     [JsonIgnore]
     public ICollection<Parts> Parts { get; private set; } = new List<Parts>();
 
+    // OData-compatible computed properties (expose VO values for $select, $filter, $orderby)
+    [NotMapped]
+    [JsonIgnore]
+    public int YearValue => Year.Value;
+
+    [NotMapped]
+    [JsonIgnore]
+    public int HorsepowerValue => Horsepower.Value;
+
+    [NotMapped]
+    [JsonIgnore]
+    public decimal PriceAmount => Price?.Amount ?? 0m;
+
     // EF Core requires parameterless constructor
     private Cars() { }
 

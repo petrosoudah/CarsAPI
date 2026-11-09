@@ -11,6 +11,45 @@ export type Car = {
 
 export type CarDetails = Pick<Car, "make" | "model" | "year" | "horsepower" | "price" | "color" | "isAvailable">;
 
+// API response types (matching backend Value Object serialization)
+type ApiCar = {
+    id: number;
+    make: string;
+    model: string;
+    year: { value: number };
+    horsepower: { value: number };
+    price: { amount: number; currency: string } | null;
+    color: string | null;
+    isAvailable: boolean;
+    createdAt: string;
+    domainEvents?: unknown[];
+};
+
+function toCar(apiCar: ApiCar): Car {
+    return {
+        id: apiCar.id,
+        make: apiCar.make,
+        model: apiCar.model,
+        year: apiCar.year.value,
+        horsepower: apiCar.horsepower.value,
+        price: apiCar.price?.amount ?? null,
+        color: apiCar.color,
+        isAvailable: apiCar.isAvailable
+    };
+}
+
+function toCarDetails(car: Car): CarDetails {
+    return {
+        make: car.make,
+        model: car.model,
+        year: car.year,
+        horsepower: car.horsepower,
+        price: car.price,
+        color: car.color,
+        isAvailable: car.isAvailable
+    };
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 if (!API_BASE_URL) {
@@ -63,7 +102,8 @@ export async function getCars({ signal, pageNumber, search, availability }: {
     if (!response.ok) {
         throw new Error("Could not load cars (" + response.status + ").");
     }
-    const items: Car[] = await response.json();
+    const apiItems: ApiCar[] = await response.json();
+    const items = apiItems.map(toCar);
     const totalHeader = response.headers.get("X-Total-Count");
     const totalCount = Number(totalHeader);
     if (totalHeader === null || !Number.isSafeInteger(totalCount) || totalCount < items.length) {
@@ -98,7 +138,8 @@ export async function saveCar(details: CarDetails, car: Car | null): Promise<Car
 
         throw message;
     }
-    return response.json();
+    const apiCar: ApiCar = await response.json();
+    return toCar(apiCar);
 }
 
 export async function deleteCar(id: number): Promise<void> {
@@ -127,7 +168,8 @@ export async function getCar(
         );
     }
 
-    return response.json();
+    const apiCar: ApiCar = await response.json();
+    return toCar(apiCar);
 }
 
 export async function updateCarAvailability(car: Car): Promise<Car> {
@@ -137,7 +179,7 @@ export async function updateCarAvailability(car: Car): Promise<Car> {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            ...car,
+            ...toCarDetails(car),
             isAvailable: !car.isAvailable
         })
     });
@@ -146,5 +188,6 @@ export async function updateCarAvailability(car: Car): Promise<Car> {
         throw await readApiError(response, "Could not update availability.");
     }
 
-    return response.json();
+    const apiCar: ApiCar = await response.json();
+    return toCar(apiCar);
 }
