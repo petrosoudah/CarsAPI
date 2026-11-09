@@ -1,424 +1,234 @@
-# A Full-Stack Car and Parts Management
+# Cars and Parts Management
 
-A full-stack application built during my GN TEQ internship while learning React, Next.js, ASP.NET Core, and SQL Server.
-
-The application manages cars and spare parts through a React interface connected to a REST API.
+A full-stack learning project built during my GN TEQ internship using React, Next.js, ASP.NET Core, and SQL Server.
 
 ## Features
 
 ### Cars
 
-- View cars and individual car details.
-- Add, edit, and delete cars.
-- Toggle availability.
-- Search by make or model.
-- Filter by availability.
+- Add, edit, delete, and view individual cars.
+- Search by make/model and filter by availability.
 - Server-side pagination with 12 cars per page.
-- Optional price and color fields.
-- Confirmation before deletion.
+- Optional price and color.
+- Independent availability updates: each card owns its pending/error state.
+- Update the affected car locally in a settled All-availability view; refresh when filters or in-flight requests require it.
+- Validation, deletion confirmation, unsaved-draft protection, and success/error feedback.
 
 ### Parts
 
-- View, add, edit, and delete parts.
-- Assign a part to a car or leave it unassigned.
-- Change or remove a part’s car assignment.
-- Server-side pagination with 12 parts per page.
-- Confirmation before deletion.
-- Retry failed loading and deletion requests.
-- Field-level validation and backend error messages.
-- Automatic page adjustment after deleting the last item on a page.
+- Add, edit, delete, and browse parts with server-side pagination.
+- Assign a part to a car, change its assignment, or leave it unassigned.
+- Validate fields and retry failed requests.
+- Adjust pagination after deleting the last item on a page.
 
-**Adding, assigning, editing, or deleting a part does not change the car’s price.**
+Assigning a part does **not** change the car's price. A car with assigned parts cannot be deleted until those parts are unassigned or deleted.
 
-### Shared Interface
+### Interface
 
-- English, Arabic, and Spanish translations.
+- English, Arabic, and Spanish dictionaries.
 - Right-to-left layout for Arabic.
-- Saved language preference.
-- Light and dark mode with a saved preference.
-- Responsive layouts.
-- Keyboard-accessible controls and dialogs.
-- Loading indicators, empty states, and error feedback.
-- Request cancellation when components unmount.
-- Disabled controls during pending saves.
+- Saved language preference and light/dark/system themes.
+- Responsive layouts, keyboard focus, accessible field feedback, and reduced-motion support.
+- Loading, empty, error, retry, and success states.
 
-## Tech Stack
+## Technology
 
-| Layer | Technologies |
+| Frontend | Backend |
 | --- | --- |
-| Frontend | React 19, Next.js 16 App Router, TypeScript |
-| Styling | Tailwind CSS 4, shadcn/ui with Base UI |
-| Localization | next-intl |
-| Themes | next-themes |
-| Backend | ASP.NET Core Minimal APIs, C# |
-| Request handling | MediatR |
-| Validation | FluentValidation |
-| Data access | Entity Framework Core |
-| Database | SQL Server |
-| Browser testing | Playwright |
-
-## Architecture
-
-```text
-React / Next.js interface
-          |
-          | HTTP requests and JSON
-          v
-ASP.NET Core REST API
-          |
-          | Validation and MediatR handlers
-          v
-Entity Framework Core
-          |
-          v
-      SQL Server
-```
-
-For example, adding a part follows this flow:
-
-1. The user completes the controlled React form.
-2. The frontend validates the input.
-3. A POST request sends the details to the API.
-4. The backend validates the request.
-5. A handler saves the part through Entity Framework Core.
-6. SQL Server stores the record.
-7. The frontend reloads the list and displays feedback.
+| Next.js 16 App Router | ASP.NET Core / .NET 10 |
+| React 19 and TypeScript | Entity Framework Core |
+| Tailwind CSS 4 | SQL Server / LocalDB |
+| shadcn/ui with Base UI | MediatR |
+| next-intl and next-themes | FluentValidation |
+| Playwright | System.Text.Json |
 
 ## Project Structure
 
-The frontend is inside the backend project folder:
+Paths below are relative to this repository's root.
 
 ```text
+CarsAPI.slnx
 CarsAPI/
-├── CarsAPI.csproj
 ├── Program.cs
-├── Models/
 ├── Data/
+├── Models/
+├── handlers and commands/
 ├── Validators/
 ├── Behaviors/
-├── handlers and commands/
+├── Exceptions/
+├── Learning/
 ├── Migrations/
 └── cars-frontend/
-    ├── app/
-    │   ├── page.tsx
-    │   ├── layout.tsx
-    │   ├── LanguageProvider.tsx
-    │   ├── ThemeProvider.tsx
-    │   ├── about/
-    │   ├── cars/[id]/
-    │   └── parts/
+    ├── app/                 # Routes, layouts, global styles
     ├── components/
-    │   ├── cars/
-    │   ├── parts/
-    │   └── ui/
+    │   ├── cars/            # Cards, list, filters, forms, dialogs
+    │   ├── parts/           # Parts form and deletion dialog
+    │   ├── layout/          # Navigation and preference controls
+    │   ├── providers/       # Theme and language providers
+    │   └── ui/              # Shared UI primitives
+    ├── hooks/               # useCars, useCarActions, translated errors
     ├── lib/
-    │   ├── cars-api.ts
-    │   ├── parts-api.ts
-    │   ├── car-validation.ts
-    │   ├── part-validation.ts
-    │   └── language-store.ts
-    ├── messages/
-    │   ├── en.json
-    │   ├── ar.json
-    │   └── es.json
-    ├── tests/e2e/
-    │   ├── dashboard.spec.ts
-    │   └── parts.spec.ts
-    ├── scripts/
-    └── playwright.config.ts
+    │   ├── api/             # HTTP helpers and API types
+    │   ├── validation/      # Pure frontend validation
+    │   ├── language-store.ts
+    │   └── utils.ts
+    ├── messages/            # English, Arabic, Spanish
+    ├── practice/            # Earlier React exercises
+    ├── public/
+    └── tests/e2e/
 ```
 
-Additional practice components are retained from earlier lessons.
+## React Design
 
-## Prerequisites
+- **useCars** owns list queries, pagination, cancellation, retry, and updates to returned cars.
+- **useCarActions** gives each card its own availability request state and immediate duplicate-request guard.
+- **CarCard** uses `memo`; stable callbacks and preserved object references let unchanged siblings skip render work.
+- Related state is grouped by responsibility into objects.
+- Event handlers perform user-triggered mutations; effects synchronize query data and browser preferences.
+- API helpers and validation stay separate from presentation.
 
-- Node.js compatible with the installed Next.js version.
-- npm.
-- .NET 10 SDK.
-- SQL Server or SQL Server LocalDB.
-- Visual Studio or another suitable editor.
+Splitting files organizes responsibilities. It does not automatically enable lazy loading or prevent every render.
 
 ## Run Locally
 
-### 1. Configure SQL Server
+### Requirements
 
-Set `ConnectionStrings:SqlServerConnection` in the backend’s local configuration.
+- Windows with SQL Server LocalDB, or a configured SQL Server connection.
+- .NET 10 SDK.
+- Node.js 20.9 or newer and npm.
+- Microsoft Edge for the default browser-test configuration.
 
-Example for SQL Server LocalDB:
+### 1. Start the API
 
-```json
-{
-  "ConnectionStrings": {
-    "SqlServerConnection": "Server=(localdb)\\MSSQLLocalDB;Database=CarsAPI_DB;Trusted_Connection=True;TrustServerCertificate=True"
-  }
-}
-```
-
-Adjust the connection string for your SQL Server instance.
-
-The backend applies pending Entity Framework Core migrations during startup.
-
-### 2. Start the Backend
-
-From the folder containing `CarsAPI.csproj`:
+From the repository root, in PowerShell:
 
 ```powershell
-dotnet run --launch-profile https
-```
-
-The local HTTPS API address is:
-
-```text
-https://localhost:7059
-```
-
-If necessary, trust the development certificate:
-
-```powershell
+cd CarsAPI
+dotnet restore
 dotnet dev-certs https --trust
+dotnet run --launch-profile https -p:TypeScriptCompileBlocked=true
 ```
 
-Restart the backend after changing its endpoints or handlers.
+The API uses `https://localhost:7059` and `http://localhost:5104`.
 
-### 3. Configure the Frontend
+The default database is `CarsAPI_DB` on `(localdb)\MSSQLLocalDB`. Configure `ConnectionStrings:SqlServerConnection` for another SQL Server. Startup applies EF Core migrations, so the database server must be available.
 
-Open another terminal:
+The TypeScript flag skips legacy backend-project TypeScript compilation entries; the Next.js frontend is checked and built separately.
+
+### 2. Start the Frontend
+
+Open another terminal at the repository root:
 
 ```powershell
-cd cars-frontend
+cd CarsAPI/cars-frontend
 npm.cmd ci
+Copy-Item .env.example .env.local
+npm.cmd run dev
 ```
 
-Create `.env.local` in `cars-frontend`:
+Set the following in `.env.local`:
 
-```env
+```dotenv
 NEXT_PUBLIC_API_BASE_URL=https://localhost:7059
 ```
 
-This is a public API address, not a place for database credentials.
+Open [http://localhost:3000](http://localhost:3000).
 
-Restart the frontend development server after changing environment variables.
-
-### 4. Start the Frontend
-
-```powershell
-npm.cmd run dev
-```
-
-Open:
-
-```text
-http://localhost:3000
-```
-
-The backend’s development CORS default permits this frontend origin.
-
-> In this Windows PowerShell setup, use `npm.cmd` and `npx.cmd` if the PowerShell script launchers are blocked.
-
-## Frontend Routes
-
-| Route | Description |
-| --- | --- |
-| `/` | Cars dashboard |
-| `/cars/{id}` | Individual car details |
-| `/parts` | Parts management |
-| `/about` | About page |
+Use `npm.cmd` and `npx.cmd` if PowerShell blocks the corresponding script launchers. The API's CORS configuration must allow the frontend origin.
 
 ## Main API Endpoints
 
-### Cars
-
-| Method | Endpoint | Description |
+| Method | Endpoint | Purpose |
 | --- | --- | --- |
-| GET | `/cars` | Read a filtered page of cars |
-| GET | `/cars/{id}` | Read one car |
+| GET | `/cars` | Search, availability filtering, pagination |
+| GET | `/cars/{id}` | Car details |
 | POST | `/cars` | Create a car |
 | PUT | `/cars/{id}` | Update a car |
-| DELETE | `/cars/{id}` | Delete a car |
-
-Car IDs are numeric.
-
-### Parts
-
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| GET | `/parts/list` | Read a page of parts |
-| GET | `/parts/{id}` | Read one part |
+| DELETE | `/cars/{id}` | Delete an unassigned car |
+| GET | `/parts/list` | Paginated parts |
+| GET | `/parts/{id}` | Part details |
 | POST | `/parts/add` | Create a part |
-| PUT | `/parts/{id}` | Update a part |
+| PUT | `/parts/{id}` | Update a part or assignment |
 | DELETE | `/parts/{id}` | Delete a part |
 
-Part IDs are GUIDs represented as strings in JSON.
+Paginated responses include `X-Total-Count`. Car IDs are integers; part IDs are GUIDs.
 
-Successful deletion returns `204 No Content`. A missing record returns `404 Not Found`.
+## Backend Learning Topics
 
-## Pagination
-
-Both dashboards display 12 records per page.
-
-The list endpoints accept:
-
-```text
-pageNumber
-pageSize
-```
-
-Example:
+- **Exception handling:** centralized validation responses, relationship conflicts (409), and logged unexpected failures with generic Problem Details.
+- **Serialization:** JSON request/response handling, DTOs, and `JsonIgnore` for navigation properties.
+- **TransactionScope:** a development-only exercise groups car and part creation across two saves and observes prepare, commit, and rollback notifications.
 
 ```http
-GET /parts/list?pageNumber=2&pageSize=12
+POST /learning/transaction-scope?simulateFailure=false
+POST /learning/transaction-scope?simulateFailure=true
 ```
 
-The response body contains the current page’s array. The `X-Total-Count` header contains the total number of matching records.
+The first commits practice records. The second intentionally fails before `Complete()` so the transaction rolls back. This exercise writes to the configured database and is available only in Development.
 
-The Cars endpoint additionally supports search and availability filtering:
+A dependency-injection `CreateScope()` manages service lifetimes; it does not provide a database transaction.
 
-```http
-GET /cars?pageNumber=1&pageSize=12&search=Toyota&isAvailable=true
-```
+## Wider Backend Internship Learning
 
-Car filters are applied before pagination.
+Alongside this dashboard, I built a separate **car-maintenance workshop** project with `Cars.Domain`, `Cars.Application`, `Cars.Infrastructure`, `Cars.Api`, and `Cars.Domain.UnitTests`.
 
-## Example Requests
+The workshop is separate from this repository's dashboard API. These lessons describe my broader internship work; its workshop models and event middleware are not features of the dashboard API.
 
-### Create a Car
+### C# and .NET
 
-```http
-POST /cars
-Content-Type: application/json
-```
+- Records and value equality, sealed classes, access modifiers, and nullable types.
+- Private constructors and static factories that return `ErrorOr<T>`.
+- Guard clauses, primary constructors, asynchronous handlers, and collection expressions.
+- Encapsulated collections and named business errors.
 
-```json
-{
-  "make": "Toyota",
-  "model": "Corolla",
-  "year": 2024,
-  "horsepower": 150,
-  "price": null,
-  "isAvailable": true,
-  "color": null
-}
-```
+### Architecture and DDD
 
-### Create an Unassigned Part
+- Layer responsibilities and inward dependency design.
+- Entities, value objects, aggregates, roots, factories, and repositories.
+- Business invariants, domain services, and application orchestration.
+- Workshop models: `Mechanic`, `WorkOrder`, `Part`, `Money`, and `EstimateLine`.
+- Aggregate references by ID and domain events for completing or cancelling work.
+- Trade-offs between transaction consistency and deferred reactions.
 
-```http
-POST /parts/add
-Content-Type: application/json
-```
+### Persistence and Request Processing
 
-```json
-{
-  "manufacturer": "Bosch",
-  "description": "Brake pads",
-  "price": 25.5,
-  "carId": null
-}
-```
+- EF Core configuration classes, owned values/collections, enum conversions, private-field mapping, and computed-property exclusions.
+- Provider selection, schema creation versus migrations, and change tracking.
+- Dependency injection lifetimes and sharing a scoped DbContext through an `IUnitOfWork` interface.
+- MediatR request handlers versus notification handlers and assembly registration.
+- Minimal APIs, HTTP error mapping, middleware, and per-request event queues.
 
-To assign the part, replace `null` with an existing numeric car ID.
+The workshop's saved configuration uses SQL Server LocalDB and resets its practice database at startup. SQLite was also explored as a learning option.
 
-The backend generates IDs for new records.
+Its event middleware experiments with publishing notifications and committing in `Response.OnCompleted`. Because this callback runs after the response is sent, a later failure cannot change that response. This is a learning implementation, not a durable outbox or guaranteed event-delivery mechanism. [Microsoft documents this callback timing](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.http.httpresponse.oncompleted).
 
-## Validation and Error Handling
+### Testing and Working Habits
 
-- Frontend validation checks user input before submission.
-- Backend validators enforce request rules independently.
-- Backend field errors appear beside the relevant form inputs.
-- Failed saves preserve the draft.
-- Loading failures offer Retry controls.
-- Pending requests disable conflicting actions.
-- Deletion requires confirmation.
-- Unknown backend messages retain their original wording.
+- xUnit `Fact`, `Theory`, `InlineData`, and Arrange–Act–Assert.
+- Testing domain rules and failure paths.
+- Fake repositories, counters, and unit-of-work implementations for isolated handler tests.
+- Checking setup failures, meaningful assertions, and state/event behavior.
+- Debugging exceptions, reading build errors, using breakpoints, and keeping Git checkpoints.
 
-## Localization and Themes
+Strategic design, bounded contexts, context maps, integration events, and the outbox remain future learning topics. The workshop tests were not rerun for this documentation update.
 
-Translation dictionaries are stored in:
+## Verification
 
-```text
-messages/en.json
-messages/ar.json
-messages/es.json
-```
-
-Components use `useTranslations` to read the selected dictionary.
-
-Arabic updates the document language and reading direction. Base UI controls receive the same direction.
-
-Language selection is saved in browser storage. Dark mode uses `next-themes` and shared CSS color tokens.
-
-Manufacturer names, descriptions, car names, and other saved data remain as entered.
-
-## Commands
-
-Run these inside `cars-frontend`:
+Run from `CarsAPI/cars-frontend`:
 
 ```powershell
-# Start development mode
-npm.cmd run dev
-
-# Run lint checks
+npx.cmd tsc --noEmit
 npm.cmd run lint
-
-# Create a production build
-npm.cmd run build
-
-# Serve that build locally
-npm.cmd run start
-
-# Run browser tests
+npm.cmd run build -- --webpack
 npm.cmd run test:e2e
 ```
 
-Build the frontend before running the browser suite.
+The completed frontend refactor passed TypeScript, ESLint, a webpack production build, and **28 browser tests** (13 Cars and 15 Parts). These checks preceded the documentation update.
 
-## Testing
+The browser suite starts the production frontend on port 3100 and intercepts API calls. It verifies interface behavior without writing to the real database. It does not replace real API/database integration checks.
 
-The project has **23 browser scenarios** covering Cars and Parts.
+The webpack build was used because the default Turbopack build encountered a CSS worker startup issue in the development environment.
 
-Coverage includes:
+## Project Scope
 
-- Language and theme persistence.
-- Pagination and boundary controls.
-- Search and availability filtering for cars.
-- Creating and editing records.
-- Assigned and unassigned parts.
-- Zero-price values.
-- Local and backend field validation.
-- Failed requests and Retry controls.
-- Disabled controls during pending operations.
-- Deletion confirmation and cancellation.
-- Deleting the last item on a page.
-- Records already deleted by another client.
-- Keyboard focus behavior.
-- Arabic mobile layouts and translated dialogs.
-
-Browser tests intercept API requests and use test data, so they do not modify the real database.
-
-Playwright starts the production frontend on port 3100 and uses installed Microsoft Edge by default.
-
-The optional `scripts/check-part-deletion.mjs` integration check verifies the real DELETE endpoint against an explicitly configured test API. It creates a uniquely marked temporary part, removes it, and checks that the associated car’s price stays unchanged.
-
-## Learning Outcomes
-
-This project helped me practice:
-
-- JSX and reusable components.
-- Props, callbacks, and lifted state.
-- State, events, and controlled forms.
-- React hooks and effect cleanup.
-- Context and shared providers.
-- Next.js routes, layouts, and dynamic pages.
-- Responsive styling and accessible controls.
-- HTTP, JSON, and REST API integration.
-- Backend validation and request handlers.
-- Entity Framework Core and SQL Server persistence.
-- Server-side pagination.
-- Localization and dark mode.
-- Browser and API integration testing.
-
-## Project Status
-
-The core local Cars and Parts application is complete.
-
-Both sections support Create, Read, Update, and Delete operations. Frontend and backend builds, code checks, browser scenarios, and the Parts DELETE integration check have passed.
+This is a local full-stack learning application. Authentication and deployment are outside the completed scope. Interface translations use maintained dictionaries rather than a runtime machine-translation service.
