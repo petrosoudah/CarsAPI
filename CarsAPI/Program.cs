@@ -350,21 +350,19 @@ app.MapPost("/parts/install",
         });
     });
 
-
-// OData EDM Model
+// OData model
 static IEdmModel GetEdmModel()
 {
     var builder = new ODataConventionModelBuilder();
 
-    // Expose the mapped primitive properties so OData queries can translate to SQL.
 
     var carsEntity = builder.EntitySet<Cars>("Cars").EntityType;
     carsEntity.HasKey(c => c.Id);
     carsEntity.Property(c => c.Make);
     carsEntity.Property(c => c.Model);
-    carsEntity.Ignore(c => c.Year);       // VO: use YearValue
-    carsEntity.Ignore(c => c.Horsepower); // VO: use HorsepowerValue
-    carsEntity.Ignore(c => c.Price);      // VO: use PriceAmount
+    carsEntity.Ignore(c => c.Year);       
+    carsEntity.Ignore(c => c.Horsepower); 
+    carsEntity.Ignore(c => c.Price);      
     carsEntity.Property(c => c.IsAvailable);
     carsEntity.Property(c => c.CreatedAt);
     carsEntity.Property(c => c.Color);
@@ -377,12 +375,12 @@ static IEdmModel GetEdmModel()
     partsEntity.HasKey(p => p.Id);
     partsEntity.Property(p => p.Manufacturer);
     partsEntity.Property(p => p.Description);
-    partsEntity.Ignore(p => p.Price); // VO: use PriceAmount
+    partsEntity.Ignore(p => p.Price); 
     partsEntity.Property(p => p.PriceAmount);
     partsEntity.Property(p => p.CarId);
     partsEntity.HasOptional(p => p.Car);
 
-    // CarPartsView is a keyless view, excluded from OData entity sets
+   
     return builder.GetEdmModel();
 }
 
