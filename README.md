@@ -62,7 +62,6 @@ CarsAPI/
 ├── Validators/                # FluentValidation validators
 ├── Behaviors/                 # MediatR pipeline behaviors
 ├── Exceptions/
-├── Learning/                  # TransactionScope demo
 ├── Migrations/                # EF Core migrations (incl. stored procs)
 └── cars-frontend/
     ├── app/                       # Routes, layouts, global styles
@@ -205,16 +204,6 @@ Examples:
 
 - **Exception handling:** malformed JSON and validation errors return 400, relationship conflicts return 409, and unexpected failures are logged with generic Problem Details.
 - **Serialization:** JSON requests use primitive year, horsepower, and price values; handlers create value objects. REST car responses contain nested value objects, which the frontend API helper converts to its flat Car type.
-- **TransactionScope:** a development-only exercise groups car and part creation across two saves and observes prepare, commit, and rollback notifications.
-
-```http
-POST /learning/transaction-scope?simulateFailure=false
-POST /learning/transaction-scope?simulateFailure=true
-```
-
-The first commits practice records. The second intentionally fails before `Complete()` so the transaction rolls back. This exercise writes to the configured database and is available only in Development.
-
-A dependency-injection `CreateScope()` manages service lifetimes; it does not provide a database transaction.
 
 ## OData
 

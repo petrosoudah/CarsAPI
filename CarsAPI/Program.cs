@@ -12,7 +12,6 @@ using Scalar.AspNetCore;
 using System.Reflection;
 using FluentValidation;
 using CarsAPI.Exceptions;
-using CarsAPI.Learning;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddValidatorsFromAssemblyContaining<AddCarsValidator>();
 
@@ -127,25 +126,6 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
-
-
-    app.MapPost("/learning/transaction-scope", async (
-        AppDbContext context,
-        CancellationToken cancellationToken,
-        bool simulateFailure = false) =>
-    {
-        var carId = await TransactionScopeDemo.RunAsync(
-            context,
-            simulateFailure,
-            cancellationToken);
-
-        return Results.Ok(new
-        {
-            carId,
-            message = "Transaction committed."
-        });
-    });
-
 }
 
 app.MapGet("/cars", async (
