@@ -13,7 +13,8 @@ async function mockApi(page: Page, initial = seedCars()) {
     let cars = initial.map(car => ({ ...car }));
     const state = {
         writes: [] as Car[], rejectSave: false, failGet: false,
-        listReads: 0, writeGate: null as Promise<void> | null, failUpdate: false,
+        listReads: 0, detailReads: 0,
+        writeGate: null as Promise<void> | null, failUpdate: false,
     };
     const api = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://localhost:7059").replace(/\/+$/, "");
     await page.route(api + "/cars**", async route => {
@@ -30,6 +31,7 @@ async function mockApi(page: Page, initial = seedCars()) {
         if (request.method() === "GET") {
             if (state.failGet) { state.failGet = false; return send(500, {}); }
             if (Number.isFinite(id) && id > 0) {
+                state.detailReads++;
                 const car = cars.find(item => item.id === id);
                 return car ? send(200, carResponse(car)) : send(404);
             }
@@ -347,4 +349,12 @@ test("load errors can be retried and a missing car has a translated message", as
     await page.locator("#language").selectOption("es");
     await page.goto("/cars/9999");
     await expect(page.getByText("No se encontró el coche.", { exact: true })).toBeVisible();
+});
+
+test("opening a car details page reads that car once", async ({ page }) => {
+    const api = await mockApi(page, seedCars(1));
+    await openDashboard(page);
+    await page.getByRole("link", { name: "Honda Car1" }).click();
+    await expect(page.getByRole("heading", { name: "Honda Car1" })).toBeVisible();
+    expect(api.detailReads).toBe(1);
 });
