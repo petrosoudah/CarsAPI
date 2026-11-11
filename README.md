@@ -278,6 +278,94 @@ Its event middleware experiments with publishing notifications and committing in
 
 Strategic design, bounded contexts, context maps, integration events, and the outbox remain future learning topics. The workshop tests were not rerun for this documentation update.
 
+## Frontend Learning Topics (Applied from Backend)
+
+The frontend mirrors backend architectural patterns, adapted for React/Next.js:
+
+### DDD → Frontend Types & Validation
+| Backend | Frontend |
+| --- | --- |
+| Value Objects (`Price`, `Year`, `Horsepower`) | Pure TS validation in `lib/validation/` with same rules (range, positive, precision) |
+| Domain Events (`CarCreated`, `CarSold`) | TanStack Query cache events via `onMutate`/`onError`/`onSettled` optimistic updates |
+| Entity base with `DomainEvents` | `useCars`/`useParts` hooks centralize mutation lifecycle |
+| Rich domain model (`Cars.Create`, `MarkSold`) | `CarFormDialog`/`PartFormDialog` encapsulate form logic; `saveCar`/`updateCarAvailability` API helpers mirror handlers |
+
+### CQRS/MediatR → TanStack Query Mutations
+- **Commands** → `useMutation` with `mutationFn` calling API
+- **Queries** → `useQuery` with keyed cache (`queryKeys`)
+- **Pipeline behaviors** → `onMutate` (optimistic), `onError` (rollback), `onSettled` (invalidate)
+- **ValidationBehavior** → Frontend `validateCar`/`validatePart` + backend FluentValidation (defense in depth)
+
+### Dependency Injection → React Context/Providers
+| Backend | Frontend |
+| --- | --- |
+| `AddDbContext`, `AddMediatR`, `AddScoped` | `QueryProvider`, `ThemeProvider`, `LanguageProvider`, `ToastProvider` in `AppProviders` |
+| Scoped `DomainEventDispatcher` | `useQueryClient` per request via provider |
+| Constructor injection | Hook composition (`useCars` → `useQueryClient`, `useTranslations`) |
+
+### OData → TanStack Query + Server Components
+- Server Components (`app/cars/[id]/page.tsx`) = server-side data fetching (like OData `$expand`)
+- `use()` + Suspense = streaming SSR with fallback (like progressive OData responses)
+- Client hooks for interactive mutations (create/update/delete)
+
+### Stored Procedures/Views → Frontend Patterns
+- **Views** → `Skeleton*` components (static previews of UI shape)
+- **Stored Procs** → `useMutation` encapsulates complex multi-step operations optimistically
+
+### EF Core Migrations → Type-Safe API Contract
+- Shared `Car`/`Part` types in `lib/api/` mirror backend DTOs
+- `cars-api.ts`/`parts-api.ts` = typed HTTP layer (like MediatR request/response)
+
+---
+
+## React/Next.js Patterns Implemented
+
+### Server vs Client Components
+- **Server**: `app/cars/[id]/page.tsx` (async, `await params`, wraps Client in `<Suspense>`)
+- **Client**: `"use client"` dashboards, dialogs, forms, command palette
+
+### React 19 `use()` + Suspense
+- `CarDetailsView.tsx`: `const car = use(getCar(id))` unwraps promise in render
+- Parent page provides `<Suspense fallback={<SkeletonDetail />}`
+
+### TanStack Query v5
+- `useCars`/`useParts`: `useQuery` (list, keepPreviousData), `useMutation` (optimistic create/update/delete)
+- `queryKeys` factory for consistent cache keys
+- `placeholderData: keepPreviousData` for smooth pagination
+
+### Optimistic Updates Pattern
+```ts
+onMutate: async (newItem) => {
+  await client.cancelQueries({ queryKey });
+  const previous = client.getQueryData(queryKey);
+  client.setQueryData(queryKey, optimisticUpdate);
+  return { previous };
+},
+onError: (_err, _vars, ctx) => ctx?.previous && client.setQueryData(queryKey, ctx.previous),
+onSettled: () => client.invalidateQueries({ queryKey })
+```
+
+### Code Slicing & Re-rendering Control
+- `types/` folder: 11 prop type files extracted from components
+- `React.memo` on `CarCard`, `useCallback` stable handlers
+- `keepPreviousData` prevents loading flicker on page change
+
+### Static Skeletons
+- `components/ui/skeleton.tsx`: 7 components (`SkeletonCard`, `SkeletonCardGrid`, `SkeletonDetail`, `SkeletonForm`, `SkeletonTable`, `SkeletonPagination`, `SkeletonPartCard`)
+- `animate-pulse` CSS, no layout shift
+
+### Internationalization
+- `next-intl` with `messages/en.json`, `es.json`, `ar.json`
+- `useTranslations`, `useFormatter` in components
+- RTL support via `dir="auto"` and CSS logical properties
+
+### Accessibility
+- ARIA labels, roles, live regions for toasts/loading
+- Keyboard navigation (Cmd+K palette, dialog focus management)
+- Focus-visible outlines, reduced-motion media query
+
+---
+
 ## Verification
 
 Run from `CarsAPI/cars-frontend`:
