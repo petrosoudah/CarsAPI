@@ -62,7 +62,6 @@ CarsAPI/
 ├── Validators/                # FluentValidation validators
 ├── Behaviors/                 # MediatR pipeline behaviors
 ├── Exceptions/
-├── Learning/                  # TransactionScope demo
 ├── Migrations/                # EF Core migrations (incl. stored procs)
 └── cars-frontend/
     ├── app/                       # Routes, layouts, global styles
