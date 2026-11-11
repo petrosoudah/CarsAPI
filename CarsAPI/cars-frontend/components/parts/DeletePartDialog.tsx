@@ -3,19 +3,13 @@
 import { useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { deletePart, type Part } from "@/lib/api/parts-api";
+import { deletePart } from "@/lib/api/parts-api";
 import useTranslatedError from "@/hooks/useTranslatedError";
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
     AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-type DeletePartDialogProps = {
-    part: Part;
-    onClose: () => void;
-    onDeleted: (id: string) => void;
-    onDeletingChange: (deleting: boolean) => void;
-};
+import type { DeletePartDialogProps } from "@/types/delete-part-dialog";
 
 export default function DeletePartDialog({ part, onClose, onDeleted, onDeletingChange }: DeletePartDialogProps) {
     const t = useTranslations("Parts");

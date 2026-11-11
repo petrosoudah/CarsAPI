@@ -2,15 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import type { CarPaginationProps } from "@/types/car-pagination";
 
-type Props = {
-    pageNumber: number;
-    totalPages: number;
-    loading: boolean;
-    onPageChange: (page: number) => void;
-};
-
-export default function CarPagination({ pageNumber, totalPages, loading, onPageChange }: Props) {
+export default function CarPagination({ pageNumber, totalPages, loading, onPageChange }: CarPaginationProps) {
     const t = useTranslations("Dashboard");
     if (totalPages <= 1) return null;
     return (

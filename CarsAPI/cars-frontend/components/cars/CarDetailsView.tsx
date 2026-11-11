@@ -1,32 +1,17 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { use } from "react";
 import { getCar } from "@/lib/api/cars-api";
-import { queryKeys } from "@/lib/api/query-keys";
 import { Badge } from "@/components/ui/badge";
 import { useFormatter, useTranslations } from "next-intl";
-import useTranslatedError from "@/hooks/useTranslatedError";
-
-type CarDetailsViewProps = {
-    id: string;
-};
+import type { CarDetailsViewProps } from "@/types/car-details-view";
 
 export default function CarDetailsView({ id }: CarDetailsViewProps) {
     const t = useTranslations("Details");
     const common = useTranslations("Common");
     const format = useFormatter();
-    const translateError = useTranslatedError();
-    const { data: car, isPending: loading, error: queryError } = useQuery({
-        queryKey: queryKeys.car(id),
-        queryFn: ({ signal }) => getCar(id, signal),
-    });
-    const error = queryError instanceof Error ? queryError.message : "";
 
-    if (loading) return <p role="status">{t("loading")}</p>;
-
-    if (error) {
-        return <p role="alert" className="text-destructive">{translateError(error)}</p>;
-    }
+    const car = use(getCar(id));
 
     if (!car) return <p>{t("notFound")}</p>;
 

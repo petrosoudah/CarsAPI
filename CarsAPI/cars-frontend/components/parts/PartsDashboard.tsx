@@ -1,80 +1,63 @@
 "use client";
 
-import { useState } from "react";
-import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getParts, PARTS_PAGE_SIZE, type Part } from "@/lib/api/parts-api";
-import { queryKeys } from "@/lib/api/query-keys";
-import PartForm from "@/components/parts/PartForm";
+import { useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
+import { useFormatter } from "next-intl";
+import { SkeletonCardGrid, SkeletonPagination } from "@/components/ui/skeleton";
+import PartFormDialog from "@/components/parts/PartFormDialog";
 import DeletePartDialog from "@/components/parts/DeletePartDialog";
 import { Button } from "@/components/ui/button";
-import { useFormatter, useTranslations } from "next-intl";
+import useParts from "@/hooks/useParts";
 import useTranslatedError from "@/hooks/useTranslatedError";
+import { useToast } from "@/components/providers/ToastProvider";
+import type { Part, PartDetails } from "@/lib/api/parts-api";
 
 export default function PartsPage() {
     const t = useTranslations("Parts");
     const format = useFormatter();
     const translateError = useTranslatedError();
-    const client = useQueryClient();
-    const [pageNumber, setPageNumber] = useState(1);
-    const [editingPart, setEditingPart] = useState<Part | null>(null);
-    const [partToDelete, setPartToDelete] = useState<Part | null>(null);
-    const [saving, setSaving] = useState(false);
-    const [notice, setNotice] = useState<"saved" | "deleted" | null>(null);
-    const list = useQuery({
-        queryKey: queryKeys.partList(pageNumber),
-        queryFn: ({ signal }) => getParts(signal, pageNumber),
-        placeholderData: keepPreviousData,
-    });
-    const parts = list.data?.items ?? [];
-    const totalCount = list.data?.totalCount ?? 0;
-    const loading = list.isFetching;
-    const error = list.error instanceof Error ? list.error.message : "";
-    const totalPages = Math.max(1, Math.ceil(totalCount / PARTS_PAGE_SIZE));
+    const { success, error: toastError } = useToast();
+    const [dialog, setDialog] = useState<{ type: "closed" | "form" | "delete"; part?: Part }>({ type: "closed" });
 
-    if (!loading && !error && pageNumber > totalPages) setPageNumber(totalPages);
+    const {
+        parts, totalCount, loading, error, pageNumber, totalPages,
+        createPart, updatePart, deletePart, isCreating, isUpdating, isDeleting,
+        changePage, refresh,
+    } = useParts();
 
-    function reloadParts() {
-        setNotice(null);
-        void client.invalidateQueries({ queryKey: queryKeys.parts });
+    const openCreate = useCallback(() => setDialog({ type: "form" }), []);
+    const openEdit = useCallback((part: Part) => setDialog({ type: "form", part }), []);
+    const openDelete = useCallback((part: Part) => setDialog({ type: "delete", part }), []);
+    const closeDialog = useCallback(() => setDialog({ type: "closed" }), []);
+
+    async function handleSubmit(details: PartDetails) {
+        if (dialog.type === "form") {
+            if (dialog.part) await updatePart({ id: dialog.part.id, details });
+            else await createPart(details);
+        }
+        closeDialog();
+        success(t("saved"));
     }
 
-    function handleSaved() {
-        if (!editingPart) setPageNumber(1);
-        setEditingPart(null);
-        reloadParts();
-        setNotice("saved");
-    }
-
-    function changePage(nextPage: number) {
-        if (loading || saving || nextPage < 1 || nextPage > totalPages) return;
-        setPageNumber(nextPage);
-        setNotice(null);
-    }
-
-    function startEditing(part: Part) {
-        setEditingPart(part);
-        setNotice(null);
-        requestAnimationFrame(() => document.getElementById("part-manufacturer")?.focus());
+    async function handleDelete(id: string) {
+        await deletePart(id);
+        closeDialog();
+        success(t("deleted"));
     }
 
     return (
-        <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-5xl space-y-4 p-4 sm:p-6">
-            <h1 className="text-3xl font-bold">{t("title")}</h1>
-            {editingPart && (
-                <Button type="button" variant="outline" disabled={saving} onClick={() => setEditingPart(null)}>
-                    {t("cancelEditing")}
-                </Button>
-            )}
-            <PartForm key={editingPart?.id ?? "new"} part={editingPart}
-                onSaved={handleSaved} onSavingChange={setSaving} />
-            {notice && <p role="status">{t(notice)}</p>}
+        <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-5xl space-y-6 p-4 sm:p-6">
+            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div><h1 className="text-3xl font-bold">{t("title")}</h1></div>
+                <Button onClick={openCreate} disabled={loading}>{t("add")}</Button>
+            </header>
 
             <section aria-label={t("listLabel")} aria-busy={loading} className="space-y-4">
-                {loading && <p role="status">{t("loading")}</p>}
+                {loading && <SkeletonCardGrid count={4} aria-label={t("loading")} />}
                 {error && (
                     <div className="space-y-2">
                         <p role="alert" className="text-destructive">{translateError(error)}</p>
-                        <Button type="button" variant="outline" disabled={saving} onClick={reloadParts}>{t("retry")}</Button>
+                        <Button type="button" variant="outline" onClick={refresh}>{t("retry")}</Button>
                     </div>
                 )}
                 {!loading && !error && (
@@ -83,7 +66,7 @@ export default function PartsPage() {
                         {parts.length === 0 ? <p>{t("empty")}</p> : (
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 {parts.map(part => (
-                                    <article key={part.id} className="partCard">
+                                    <article key={part.id} className="partCard space-y-4 p-4 rounded-xl border">
                                         <h2 className="break-words font-semibold"><bdi>{part.manufacturer}</bdi></h2>
                                         <p className="break-words">{part.description}</p>
                                         <p>{t("price", { value: format.number(part.price, {
@@ -91,13 +74,8 @@ export default function PartsPage() {
                                         }) })}</p>
                                         <p>{t("car", { name: part.carName ?? t("unassigned") })}</p>
                                         <div className="flex flex-wrap gap-2">
-                                            <Button type="button" variant="outline" disabled={saving} onClick={() => startEditing(part)}>
-                                                {t("edit")}
-                                            </Button>
-                                            <Button type="button" variant="destructive" disabled={saving} onClick={() => {
-                                                setPartToDelete(part);
-                                                setNotice(null);
-                                            }}>{t("delete")}</Button>
+                                            <Button type="button" variant="outline" disabled={isUpdating} onClick={() => openEdit(part)}>{t("edit")}</Button>
+                                            <Button type="button" variant="destructive" disabled={isDeleting} onClick={() => openDelete(part)}>{t("delete")}</Button>
                                         </div>
                                     </article>
                                 ))}
@@ -106,23 +84,39 @@ export default function PartsPage() {
                     </>
                 )}
             </section>
+
             {!error && totalPages > 1 && (
                 <nav aria-label={t("pagination")} className="flex flex-wrap items-center justify-center gap-3">
-                    <Button type="button" variant="outline" disabled={loading || saving || pageNumber <= 1}
-                        onClick={() => changePage(pageNumber - 1)}>{t("previous")}</Button>
-                    <span role="status">{t("page", { page: pageNumber, pages: totalPages })}</span>
-                    <Button type="button" variant="outline" disabled={loading || saving || pageNumber >= totalPages}
-                        onClick={() => changePage(pageNumber + 1)}>{t("next")}</Button>
+                    {loading ? (
+                        <SkeletonPagination aria-label={t("loading")} />
+                    ) : (
+                        <>
+                            <Button type="button" variant="outline" disabled={pageNumber <= 1}
+                                onClick={() => changePage(pageNumber - 1)}>{t("previous")}</Button>
+                            <span role="status">{t("page", { page: pageNumber, pages: totalPages })}</span>
+                            <Button type="button" variant="outline" disabled={pageNumber >= totalPages}
+                                onClick={() => changePage(pageNumber + 1)}>{t("next")}</Button>
+                        </>
+                    )}
                 </nav>
             )}
-            {partToDelete && <DeletePartDialog part={partToDelete} onClose={() => setPartToDelete(null)}
-                onDeletingChange={setSaving} onDeleted={id => {
-                    setPartToDelete(null);
-                    if (editingPart?.id === id) setEditingPart(null);
-                    if (parts.length === 1 && pageNumber > 1) setPageNumber(previous => previous - 1);
-                    reloadParts();
-                    setNotice("deleted");
-                }} />}
+
+            {dialog.type === "form" && (
+                <PartFormDialog
+                    part={dialog.part}
+                    onClose={closeDialog}
+                    onSubmit={handleSubmit}
+                    isSubmitting={dialog.part ? isUpdating : isCreating}
+                />
+            )}
+            {dialog.type === "delete" && dialog.part && (
+                <DeletePartDialog
+                    part={dialog.part}
+                    onClose={closeDialog}
+                    onDeleted={handleDelete}
+                    onDeletingChange={() => {}}
+                />
+            )}
         </main>
     );
 }

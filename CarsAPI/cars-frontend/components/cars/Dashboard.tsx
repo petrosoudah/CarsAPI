@@ -10,48 +10,49 @@ import CarPagination from "@/components/cars/CarPagination";
 import CarFormDialog from "@/components/cars/CarFormDialog";
 import DeleteCarDialog from "@/components/cars/DeleteCarDialog";
 import { Button } from "@/components/ui/button";
-
-type DialogState =
-    | { type: "closed" }
-    | { type: "form"; car: Car | null }
-    | { type: "delete"; car: Car };
+import type { DialogState } from "@/types/dashboard";
+import { useToast } from "@/components/providers/ToastProvider";
 
 export default function Home() {
     const t = useTranslations("Dashboard");
-    const [notice, setNotice] = useState<"saved" | "deleted" | null>(null);
+    const { success, error: toastError } = useToast();
     const [dialog, setDialog] = useState<DialogState>({ type: "closed" });
     const {
         cars, totalCount, loading, error, query, totalPages, hasFilters,
         refresh, changeSearch, changeAvailability, changePage, clearFilters, applyCarUpdate,
+        createCar, updateCar, deleteCar, isCreating, isUpdating, isDeleting,
     } = useCars();
 
     const openCreate = useCallback(() => {
-        setNotice(null);
         setDialog({ type: "form", car: null });
     }, []);
     const openEdit = useCallback((car: Car) => {
-        setNotice(null);
         setDialog({ type: "form", car });
     }, []);
     const openDelete = useCallback((car: Car) => {
-        setNotice(null);
         setDialog({ type: "delete", car });
     }, []);
     const closeDialog = useCallback(() => setDialog({ type: "closed" }), []);
     const handleCarUpdated = useCallback((car: Car) => {
-        setNotice(null);
         applyCarUpdate(car);
     }, [applyCarUpdate]);
 
-    function handleSaved() {
-        refresh(dialog.type === "form" && dialog.car === null);
+    async function handleSubmit(details: { make: string; model: string; year: number; horsepower: number; price: number | null; color: string | null; isAvailable: boolean }) {
+        if (dialog.type === "form") {
+            if (dialog.car === null) {
+                await createCar(details);
+            } else {
+                await updateCar({ id: dialog.car.id, details });
+            }
+        }
         closeDialog();
-        setNotice("saved");
+        success(t("carSaved"));
     }
-    function handleDeleted() {
-        refresh();
+
+    async function handleDelete(car: Car) {
+        await deleteCar(car.id);
         closeDialog();
-        setNotice("deleted");
+        success(t("carDeleted"));
     }
 
     return (
@@ -61,33 +62,36 @@ export default function Home() {
                     <h1 className="text-3xl font-bold">{t("title")}</h1>
                     <p className="text-muted-foreground">{t("description")}</p>
                 </div>
-                <Button disabled={loading || Boolean(error)} onClick={openCreate}>{t("addCar")}</Button>
+                <Button disabled={loading || Boolean(error)} onClick={openCreate} data-command="add-car">{t("addCar")}</Button>
             </header>
-            <div role="status" aria-atomic="true">
-                {notice && (
-                    <p className="font-medium text-emerald-800 dark:text-emerald-300">
-                        {t(notice === "saved" ? "carSaved" : "carDeleted")}
-                    </p>
-                )}
-            </div>
             <CarFilters search={query.search} availability={query.availability}
-                onSearchChange={value => { setNotice(null); changeSearch(value); }}
-                onAvailabilityChange={value => { setNotice(null); changeAvailability(value); }}
-                onClear={() => { setNotice(null); clearFilters(); }} />
+                onSearchChange={value => { changeSearch(value); }}
+                onAvailabilityChange={value => { changeAvailability(value); }}
+                onClear={() => { clearFilters(); }} />
             <CarList cars={cars} totalCount={totalCount} loading={loading} error={error}
                 busy={loading || dialog.type !== "closed"} hasFilters={hasFilters}
-                onRetry={() => { setNotice(null); refresh(); }}
-                onClear={() => { setNotice(null); clearFilters(); }} onCreate={openCreate}
+                onRetry={() => { refresh(); }}
+                onClear={() => { clearFilters(); }} onCreate={openCreate}
                 onUpdated={handleCarUpdated} onEdit={openEdit} onDelete={openDelete} />
             {!error && (
                 <CarPagination pageNumber={query.pageNumber} totalPages={totalPages} loading={loading}
-                    onPageChange={page => { setNotice(null); changePage(page); }} />
+                    onPageChange={page => { changePage(page); }} />
             )}
             {dialog.type === "form" && (
-                <CarFormDialog car={dialog.car} onClose={closeDialog} onSaved={handleSaved} />
+                <CarFormDialog
+                    car={dialog.car}
+                    onClose={closeDialog}
+                    onSubmit={handleSubmit}
+                    isSubmitting={dialog.car === null ? isCreating : isUpdating}
+                />
             )}
             {dialog.type === "delete" && (
-                <DeleteCarDialog car={dialog.car} onClose={closeDialog} onDeleted={handleDeleted} />
+                <DeleteCarDialog
+                    car={dialog.car}
+                    onClose={closeDialog}
+                    onDelete={handleDelete}
+                    isDeleting={isDeleting}
+                />
             )}
         </main>
     );

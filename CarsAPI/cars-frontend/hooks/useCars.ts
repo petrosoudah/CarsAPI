@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CARS_PAGE_SIZE, getCars, type Car } from "@/lib/api/cars-api";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CARS_PAGE_SIZE, deleteCar, getCars, saveCar, type Car, type CarDetails } from "@/lib/api/cars-api";
 import { queryKeys } from "@/lib/api/query-keys";
 
 type CarsQuery = {
@@ -85,10 +85,74 @@ export default function useCars() {
         client.setQueryData(queryKeys.car(String(updatedCar.id)), updatedCar);
     }, [client, debouncedSearch, refresh]);
 
+    // Optimistic create
+    const createMutation = useMutation({
+        mutationFn: (details: CarDetails) => saveCar(details, null),
+        onMutate: async (newCar) => {
+            await client.cancelQueries({ queryKey: queryKeys.cars });
+            const previousCars = client.getQueryData<{ items: Car[]; totalCount: number }>(listKey);
+            const tempId = Date.now();
+            const optimisticCar: Car = { ...newCar, id: tempId, isAvailable: newCar.isAvailable ?? true };
+            client.setQueryData<{ items: Car[]; totalCount: number }>(listKey, (old) => old ? { ...old, items: [optimisticCar, ...old.items], totalCount: old.totalCount + 1 } : old);
+            return { previousCars };
+        },
+        onError: (_err, _newCar, context) => {
+            if (context?.previousCars) client.setQueryData(listKey, context.previousCars);
+        },
+        onSettled: () => {
+            client.invalidateQueries({ queryKey: queryKeys.cars });
+        },
+    });
+
+    // Optimistic delete
+    const deleteMutation = useMutation({
+        mutationFn: (id: number) => deleteCar(id),
+        onMutate: async (id) => {
+            await client.cancelQueries({ queryKey: queryKeys.cars });
+            const previousCars = client.getQueryData<{ items: Car[]; totalCount: number }>(listKey);
+            client.setQueryData<{ items: Car[]; totalCount: number }>(listKey, (old) => old ? { ...old, items: old.items.filter((car: Car) => car.id !== id), totalCount: old.totalCount - 1 } : old);
+            client.removeQueries({ queryKey: queryKeys.car(String(id)) });
+            return { previousCars };
+        },
+        onError: (_err, _id, context) => {
+            if (context?.previousCars) client.setQueryData(listKey, context.previousCars);
+        },
+        onSettled: () => {
+            client.invalidateQueries({ queryKey: queryKeys.cars });
+        },
+    });
+
+    // Optimistic update
+    const updateMutation = useMutation({
+        mutationFn: ({ id, details }: { id: number; details: CarDetails }) => saveCar(details, { id } as Car),
+        onMutate: async ({ id, details }) => {
+            await client.cancelQueries({ queryKey: queryKeys.cars });
+            const previousCars = client.getQueryData<{ items: Car[]; totalCount: number }>(listKey);
+            const optimisticCar: Car = { id, ...details };
+            client.setQueryData<{ items: Car[]; totalCount: number }>(listKey, (old) =>
+                old ? { ...old, items: old.items.map((car) => (car.id === id ? optimisticCar : car)) } : old
+            );
+            client.setQueryData(queryKeys.car(String(id)), optimisticCar);
+            return { previousCars };
+        },
+        onError: (_err, _vars, context) => {
+            if (context?.previousCars) client.setQueryData(listKey, context.previousCars);
+        },
+        onSettled: () => {
+            client.invalidateQueries({ queryKey: queryKeys.cars });
+        },
+    });
+
     return {
         cars, totalCount, loading,
         error: list.error instanceof Error ? list.error.message : "",
         query, totalPages, hasFilters: search !== "" || availability !== "all",
         refresh, changeSearch, changeAvailability, changePage, clearFilters, applyCarUpdate,
+        createCar: createMutation.mutateAsync,
+        updateCar: updateMutation.mutateAsync,
+        deleteCar: deleteMutation.mutateAsync,
+        isCreating: createMutation.isPending,
+        isUpdating: updateMutation.isPending,
+        isDeleting: deleteMutation.isPending,
     };
 }

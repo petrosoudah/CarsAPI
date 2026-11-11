@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSwitcher from "./LanguageSwitcher";
-import { usePathname } from "next/navigation"; 
+import { usePathname } from "next/navigation";
+import { CommandPalette } from "@/components/ui/command-palette";
 
 export default function Navigation() {
     const t = useTranslations("Common");
@@ -28,7 +29,8 @@ export default function Navigation() {
                     {t("parts")}
                 </Link>
             <LanguageSwitcher />
-            <ThemeToggle />
+            <ThemeToggle data-command="toggle-theme" />
+            <CommandPalette />
         </nav>
         </>
     );

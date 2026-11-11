@@ -160,5 +160,39 @@
     "descriptionLength": "Use no more than 500 characters.",
     "price": "Enter a nonnegative price with no more than two decimal places.",
     "car": "Choose a valid car or leave the part unassigned."
+  },
+  "Toast": {
+    "loading": "Loading...",
+    "success": "Saved successfully.",
+    "error": "An error occurred.",
+    "carSaved": "Car saved successfully.",
+    "carDeleted": "Car deleted successfully.",
+    "carAvailabilityUpdated": "Availability updated.",
+    "partSaved": "Part saved successfully.",
+    "partDeleted": "Part deleted successfully.",
+    "undo": "Undo",
+    "retry": "Retry"
+  },
+  "CommandPalette": {
+    "placeholder": "Type a command or search...",
+    "noResults": "No commands found.",
+    "navigation": "Navigation",
+    "dashboard": "Go to Dashboard",
+    "dashboardDesc": "View car inventory overview",
+    "parts": "Go to Parts",
+    "partsDesc": "Manage spare parts inventory",
+    "about": "Go to About",
+    "aboutDesc": "Learn about the application",
+    "cars": "Cars",
+    "addCar": "Add New Car",
+    "addCarDesc": "Create a new car entry",
+    "searchCars": "Search Cars",
+    "searchCarsDesc": "Filter cars by make or model",
+    "partsSection": "Parts",
+    "addPart": "Add New Part",
+    "addPartDesc": "Create a new spare part",
+    "settings": "Settings",
+    "toggleTheme": "Toggle Dark Mode",
+    "toggleThemeDesc": "Switch between light and dark theme"
   }
 }

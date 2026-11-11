@@ -4,18 +4,11 @@ import { useTranslations } from "next-intl";
 import CarSearchInput from "@/components/cars/CarSearchInput";
 import { Button } from "@/components/ui/button";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-
-type Props = {
-    search: string;
-    availability: string;
-    onSearchChange: (value: string) => void;
-    onAvailabilityChange: (value: string) => void;
-    onClear: () => void;
-};
+import type { CarFiltersProps } from "@/types/car-filters";
 
 export default function CarFilters({
     search, availability, onSearchChange, onAvailabilityChange, onClear,
-}: Props) {
+}: CarFiltersProps) {
     const t = useTranslations("Dashboard");
     return (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Car } from "@/lib/api/cars-api";
+import type { CarCardProps } from "@/types/car-card";
 import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,14 +9,6 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import useCarActions from "@/hooks/useCarActions";
 import useTranslatedError from "@/hooks/useTranslatedError";
-
-type CarCardProps = {
-    car: Car;
-    busy: boolean;
-    onUpdated: (updatedCar: Car) => void;
-    onEdit: (car: Car) => void;
-    onDelete: (car: Car) => void;
-};
 
 function CarCard({ car, busy, onUpdated, onEdit, onDelete }: CarCardProps) {
     const t = useTranslations("Card");

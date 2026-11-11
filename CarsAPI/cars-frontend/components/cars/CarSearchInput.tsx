@@ -2,11 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
-
-type CarSearchInputProps = {
-    search: string;
-    onSearchChange: (value: string) => void;
-};
+import type { CarSearchInputProps } from "@/types/car-search-input";
 
 export default function CarSearchInput({
     search,
@@ -19,6 +15,7 @@ export default function CarSearchInput({
             onChange={e => onSearchChange(e.target.value)}
             placeholder={t("searchPlaceholder")}
             aria-label={t("searchLabel")}
+            data-command="search-cars"
         />
     );
 }

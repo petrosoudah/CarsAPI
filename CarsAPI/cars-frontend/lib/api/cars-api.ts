@@ -150,7 +150,7 @@ export async function deleteCar(id: number): Promise<void> {
 
 export async function getCar(
     id: string,
-    signal: AbortSignal
+    signal?: AbortSignal
 ): Promise<Car | null> {
     const response = await fetch(
         CARS_URL + "/" + encodeURIComponent(id),

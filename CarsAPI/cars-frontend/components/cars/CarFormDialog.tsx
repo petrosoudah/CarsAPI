@@ -1,22 +1,16 @@
 "use client";
 
 import { useState, useRef, type FormEvent } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import useTranslatedError from "@/hooks/useTranslatedError";
-import { CarValidationError, saveCar, type Car } from "@/lib/api/cars-api";
+import { CarValidationError, saveCar, type Car, type CarDetails } from "@/lib/api/cars-api";
 import { validateCar, type CarFieldErrors, type CarFormValues } from "@/lib/validation/car-validation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import type { CarFormDialogProps } from "@/types/car-form-dialog";
 
-type CarFormDialogProps = {
-    car: Car | null;
-    onClose: () => void;
-    onSaved: (car: Car) => void;
-};
-
-export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogProps) {
+export default function CarFormDialog({ car, onClose, onSubmit, isSubmitting = false }: CarFormDialogProps) {
     const t = useTranslations("Form");
     const common = useTranslations("Common");
     const validation = useTranslations("Validation");
@@ -30,10 +24,7 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
     const initialValues = useRef(values);
     const [fieldErrors, setFieldErrors] = useState<CarFieldErrors>({});
     const [serverErrors, setServerErrors] = useState<Partial<Record<keyof CarFormValues, string>>>({});
-    const save = useMutation({
-        mutationFn: (details: Parameters<typeof saveCar>[0]) => saveCar(details, car),
-    });
-    const saving = save.isPending;
+    const saving = isSubmitting;
     const [error, setError] = useState("");
     const maxYear = new Date().getFullYear() + 1;
 
@@ -63,15 +54,18 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
             return;
         }
 
+        const details: CarDetails = {
+            make: values.make.trim(),
+            model: values.model.trim(),
+            year: Number(values.year),
+            horsepower: Number(values.horsepower),
+            price: values.price.trim() === "" ? null : Number(values.price),
+            color: values.color.trim() || null,
+            isAvailable: values.isAvailable === "true",
+        };
+
         try {
-            const savedCar = await save.mutateAsync({
-                make: values.make.trim(), model: values.model.trim(),
-                year: Number(values.year), horsepower: Number(values.horsepower),
-                price: values.price.trim() === "" ? null : Number(values.price),
-                color: values.color.trim() || null,
-                isAvailable: values.isAvailable === "true",
-            });
-            onSaved(savedCar);
+            await onSubmit(details);
         } catch (err) {
             if (err instanceof CarValidationError) {
                 const mapped: Partial<Record<keyof CarFormValues, string>> = {};
@@ -81,7 +75,6 @@ export default function CarFormDialog({ car, onClose, onSaved }: CarFormDialogPr
                 }
                 setServerErrors(mapped);
                 setError(Object.keys(mapped).length > 0 ? "Please enter valid car details." : err.message);
-                // Wait until disabled controls have been re-enabled.
                 requestAnimationFrame(() => focusField(form, mapped));
             } else {
                 setError(err instanceof Error ? err.message : "Could not save car.");

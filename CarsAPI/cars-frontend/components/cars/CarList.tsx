@@ -1,42 +1,28 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { Car } from "@/lib/api/cars-api";
+import type { CarListProps } from "@/types/car-list";
 import CarCard from "./CarCard";
 import useTranslatedError from "@/hooks/useTranslatedError";
 import { Button } from "@/components/ui/button";
-
-type Props = {
-    cars: Car[];
-    totalCount: number;
-    loading: boolean;
-    error: string;
-    busy: boolean;
-    hasFilters: boolean;
-    onRetry: () => void;
-    onClear: () => void;
-    onCreate: () => void;
-    onUpdated: (car: Car) => void;
-    onEdit: (car: Car) => void;
-    onDelete: (car: Car) => void;
-};
+import { SkeletonCardGrid } from "@/components/ui/skeleton";
 
 export default function CarList({
     cars, totalCount, loading, error, busy, hasFilters,
     onRetry, onClear, onCreate, onUpdated, onEdit, onDelete,
-}: Props) {
+}: CarListProps) {
     const t = useTranslations("Dashboard");
     const translateError = useTranslatedError();
     return (
         <section aria-busy={loading} aria-label={t("listLabel")} className="space-y-4">
-            {loading && <p role="status">{t("loading")}</p>}
+            {loading && <SkeletonCardGrid count={4} aria-label={t("loading")} />}
             {error && (
                 <div className="carLoadError">
                     <p role="alert" className="text-destructive">{translateError(error)}</p>
                     <Button variant="outline" onClick={onRetry}>{t("retry")}</Button>
                 </div>
             )}
-            {!error && (cars.length > 0 || !loading) && (
+            {!error && !loading && (
                 <>
                     <p role="status" className="text-sm text-muted-foreground">
                         {t("results", { count: cars.length, total: totalCount })}
@@ -47,7 +33,7 @@ export default function CarList({
                                 onUpdated={onUpdated} onEdit={onEdit} onDelete={onDelete} />
                         ))}
                     </div>
-                    {!loading && cars.length === 0 && (
+                    {cars.length === 0 && (
                         <div className="emptyState">
                             <h2 className="text-xl font-semibold">
                                 {t(hasFilters ? "noMatches" : "emptyTitle")}

@@ -160,5 +160,39 @@
     "descriptionLength": "Usa un máximo de 500 caracteres.",
     "price": "Introduce un precio no negativo con un máximo de dos decimales.",
     "car": "Selecciona un coche válido o deja la pieza sin asignar."
+  },
+  "Toast": {
+    "loading": "Cargando...",
+    "success": "Guardado correctamente.",
+    "error": "Ocurrió un error.",
+    "carSaved": "Coche guardado correctamente.",
+    "carDeleted": "Coche eliminado correctamente.",
+    "carAvailabilityUpdated": "Disponibilidad actualizada.",
+    "partSaved": "Pieza guardada correctamente.",
+    "partDeleted": "Pieza eliminada correctamente.",
+    "undo": "Deshacer",
+    "retry": "Reintentar"
+  },
+  "CommandPalette": {
+    "placeholder": "Escribe un comando o busca...",
+    "noResults": "No se encontraron comandos.",
+    "navigation": "Navegación",
+    "dashboard": "Ir al Panel",
+    "dashboardDesc": "Ver resumen del inventario de coches",
+    "parts": "Ir a Piezas",
+    "partsDesc": "Gestionar inventario de repuestos",
+    "about": "Ir a Acerca de",
+    "aboutDesc": "Información sobre la aplicación",
+    "cars": "Coches",
+    "addCar": "Añadir Coche",
+    "addCarDesc": "Crear una nueva entrada de coche",
+    "searchCars": "Buscar Coches",
+    "searchCarsDesc": "Filtrar coches por marca o modelo",
+    "partsSection": "Piezas",
+    "addPart": "Añadir Pieza",
+    "addPartDesc": "Crear una nueva pieza de repuesto",
+    "settings": "Ajustes",
+    "toggleTheme": "Alternar Modo Oscuro",
+    "toggleThemeDesc": "Cambiar entre tema claro y oscuro"
   }
 }
