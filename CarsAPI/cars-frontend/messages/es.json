@@ -136,6 +136,8 @@
     "cancelEditing": "Cancelar edición",
     "edit": "Editar pieza",
     "add": "Añadir pieza",
+    "editDescription": "Actualiza los datos de la pieza.",
+    "addDescription": "Introduce los datos de la pieza para añadirla a tu inventario.",
     "save": "Guardar cambios",
     "saving": "Guardando...",
     "manufacturer": "Fabricante",

@@ -136,6 +136,8 @@
     "cancelEditing": "Cancel editing",
     "edit": "Edit part",
     "add": "Add part",
+    "editDescription": "Update the part details.",
+    "addDescription": "Enter the part details to add it to your inventory.",
     "save": "Save changes",
     "saving": "Saving...",
     "manufacturer": "Manufacturer",
